@@ -105,6 +105,8 @@ export default async function handler(
               product_variants: product.variants,
               image: product.image ? product.image.src : null,
               product_tags: product.tags,
+              product_link:
+                i % 2 === 0 ? "www.boarder.com/p/" + product.id : null,
               store_id: storeId,
             },
             { onConflict: "id" }

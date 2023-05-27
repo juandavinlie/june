@@ -1,25 +1,41 @@
 import { Box, InputAdornment, TextField, Typography } from "@mui/material"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Store } from "../models/Store"
 import SendIcon from "@mui/icons-material/Send"
 import PersonIcon from "@mui/icons-material/Person"
 import SmartToyIcon from "@mui/icons-material/SmartToy"
 import { Configuration, OpenAIApi } from "openai"
+import { useDispatch, useSelector } from "react-redux"
+import { RootState } from "@/redux/config"
+import { ShopifyProduct } from "../models/ShopifyProduct"
+import { addProducts } from "@/redux/ProductsSlice"
+import ConversationShopifyProductCard from "../components/ConversationShopifyProductCard"
+import { Product } from "../models/Product"
 
 const configuration = new Configuration({
   apiKey: "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",
 })
 delete configuration.baseOptions.headers["User-Agent"]
 const openai = new OpenAIApi(configuration)
+const model = "gpt-3.5-turbo-0301"
 
-interface ChatStripeProps {
-  message: string
-  isBot: boolean
-  picSrc: string
+interface Message {
+  role: string
+  content: string
 }
 
-const ChatStripe = ({ message, isBot }: ChatStripeProps) => {
+interface MessageWithProducts {
+  message: Message
+  products: [Product]
+}
+
+interface RichChatStripeProps {
+  messageWithProducts: MessageWithProducts
+}
+
+const RichChatStripe = ({ messageWithProducts }: RichChatStripeProps) => {
+  const isBot = messageWithProducts.message.role === "assistant"
   return (
     <Box
       borderBottom="0.1px solid #D3D3D3"
@@ -31,7 +47,43 @@ const ChatStripe = ({ message, isBot }: ChatStripeProps) => {
       gap="15px"
     >
       {isBot ? <SmartToyIcon /> : <PersonIcon />}
-      <Typography>{message}</Typography>
+      <Box display="flex" flexDirection="column" gap="20px">
+        <>
+          <Typography>{messageWithProducts.message.content}</Typography>
+          {messageWithProducts.products &&
+            messageWithProducts.products.map((product: Product) => {
+              const shopifyProduct = product as ShopifyProduct
+              return (
+                <ConversationShopifyProductCard
+                  product={shopifyProduct}
+                  key={shopifyProduct.productId}
+                />
+              )
+            })}
+        </>
+      </Box>
+    </Box>
+  )
+}
+
+interface NormalChatStripeProps {
+  content: string
+  isBot: boolean
+}
+
+const NormalChatStripe = ({ content, isBot }: NormalChatStripeProps) => {
+  return (
+    <Box
+      borderBottom="0.1px solid #D3D3D3"
+      width="auto"
+      bgcolor={isBot ? "#f7f7f8" : "#ffffff"}
+      p="36px 70px"
+      display="flex"
+      flexDirection="row"
+      gap="15px"
+    >
+      {isBot ? <SmartToyIcon /> : <PersonIcon />}
+      <Typography>{content}</Typography>
     </Box>
   )
 }
@@ -61,21 +113,27 @@ const StoreConversationPage = () => {
   const router = useRouter()
 
   const [store, setStore] = useState<Store | null>(null)
+  const storeProducts = useSelector(
+    (state: RootState) =>
+      state.productsSliceReducer.products[router.query.storeId as string]
+  )
 
   const [prompt, setPrompt] = useState<string>("")
-  const [submittedPrompt, setSubmittedPrompt] = useState(undefined)
+  const [submittedPrompt, setSubmittedPrompt] = useState<string>("")
 
   const categories = ["snowboards", "wax", "gift card"]
 
   const storeInitMessages = [
     {
       role: "user",
-      content: `You are a store assistant with the main objective of persuading me to buy products from your store which sells ${categories.join(", ")}. Don't justify your answers. Don't apologize for mistakes. Jump straight to the answers. At all times, only talk about products explicitly mentioned in the CONTEXT provided. Be confident in your answers. Always provide the product link in the format <LINK>{product_link}</LINK>. Talk to me like a human.`,
+      content: `You are a store assistant with the main objective of persuading me to buy products from your store which sells ${categories.join(
+        ", "
+      )}. Don't justify your answers. Don't apologize for mistakes. Jump straight to the answers. Be confident in your answers. Always provide the product id in the format <ID>{id}</ID>. Talk to me like a human.`,
     },
     {
       role: "assistant",
       content:
-        "Sure! I will only talk about products explicitly mentioned in the CONTEXT provided. I will jump straight to the answer. I will be confident in my answers. I will always provide the product link for every product discussed in the format <LINK>{product_link}</LINK>. I will talk like a human.",
+        "Sure! I will jump straight to the answer. I will be confident in my answers. I will always provide the product id in the format <ID>{id}</ID> I will talk like a human.",
     },
   ]
 
@@ -86,17 +144,46 @@ const StoreConversationPage = () => {
   const conversationIsNotEmpty =
     (messages && messages.length > 0) || isWaitingResponse
 
+  const bottomPageRef = useRef<HTMLInputElement>(null)
+
+  const dispatch = useDispatch()
+
   const getStore = async (storeId: string) => {
     setStore(null)
   }
 
+  const getStoreProducts = async (storeId: string) => {
+    const response = await fetch(`/api/stores/${storeId}/products`, {
+      method: "GET",
+    })
+    const integration = storeId.split("_")[0]
+    if (response.ok) {
+      const data = await response.json()
+      let products = {}
+      if (integration === "shopify") {
+        products = Object.assign(
+          {},
+          ...data.map((product: any) => ({
+            [product.id]: new ShopifyProduct(product),
+          }))
+        )
+      }
+      dispatch(addProducts({ storeId, products }))
+    }
+  }
+
   const getLatestMessages = () => {
     const numMessages = LATEST_FACTOR * 2
+    let latestMessages = []
     if (messages.length <= numMessages) {
-      return messages
+      latestMessages = messages
     } else {
-      return messages.slice(-1 * numMessages)
+      latestMessages = messages.slice(-1 * numMessages)
     }
+
+    return latestMessages.map((messageWithProducts: MessageWithProducts) => {
+      return messageWithProducts.message
+    })
   }
 
   const getConversationString = () => {
@@ -113,8 +200,39 @@ const StoreConversationPage = () => {
     return conversation
   }
 
+  const getMentionedProducts = (paragraph: string) => {
+    const mentionedProducts = []
+    let startIdx = 0
+    while (true) {
+      const openIdTagIdx = paragraph.indexOf("<ID>", startIdx)
+      if (openIdTagIdx === -1) {
+        break
+      }
+      const closeIdTagIdx = paragraph.indexOf("</ID>", openIdTagIdx)
+
+      const productId = parseInt(
+        paragraph.substring(openIdTagIdx + 4, closeIdTagIdx)
+      )
+      if (storeProducts && storeProducts[productId]) {
+        mentionedProducts.push(storeProducts[productId])
+      }
+      startIdx = closeIdTagIdx
+    }
+    return mentionedProducts
+  }
+
   const handleSubmit = async (prompt: string) => {
     try {
+      setIsError(false)
+
+      if (prompt.length === 0) {
+        throw "Prompt is empty"
+      }
+
+      setSubmittedPrompt(prompt)
+      setIsWaitingResponse(true)
+      setPrompt("")
+
       let conversation = getConversationString()
       conversation += `last_prompt: ${prompt}`
 
@@ -123,7 +241,7 @@ const StoreConversationPage = () => {
         "last_prompt",
       ]
       const contextualisedPromptResponse = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo",
+        model,
         messages: [
           {
             role: "user",
@@ -141,7 +259,6 @@ const StoreConversationPage = () => {
       ) {
         contextualisedPrompt =
           contextualisedPromptResponse.data.choices[0].message.content
-        console.log(conversation)
         console.log(contextualisedPrompt)
       } else {
         console.log(contextualisedPromptResponse)
@@ -166,18 +283,23 @@ const StoreConversationPage = () => {
         console.log(latestMessages)
         const messagesWithPromptWithContext = [
           ...storeInitMessages,
+          ...latestMessages,
           ...[
             {
               role: "user",
-              content: `CONTEXT: ${context}`,
+              content: `Your store only has the following products available for sale and nothing else: ${context}. Always provide the id of the product in the format <ID>{id}</ID> in your response.`,
             },
           ],
-          ...latestMessages,
-          ...[{ role: "user", content: prompt }],
+          ...[
+            {
+              role: "user",
+              content: `${prompt}.`,
+            },
+          ],
         ]
         console.log(messagesWithPromptWithContext)
         const chatResponse = await openai.createChatCompletion({
-          model: "gpt-3.5-turbo",
+          model,
           messages: messagesWithPromptWithContext,
           temperature: 0,
         })
@@ -191,33 +313,62 @@ const StoreConversationPage = () => {
           const reply = chatResponse.data.choices[0].message
           const messagesWithPromptAndReply = [
             ...messages,
-            ...[{ role: "user", content: prompt }],
-            ...[reply],
+            ...[{ message: { role: "user", content: prompt }, productIds: [] }],
+            ...[
+              {
+                message: reply,
+                products: getMentionedProducts(reply.content),
+              },
+            ],
           ]
+          console.log(messagesWithPromptAndReply)
           setMessages(messagesWithPromptAndReply)
+          setIsWaitingResponse(false)
         } else {
-          console.log(chatResponse)
+          throw "No reply received from June"
         }
       } else {
-        console.log("Response is not ok")
+        throw "Embeddings Response is not ok"
       }
     } catch (error) {
       console.log(error)
+      if (prompt.length > 0) {
+        setIsError(true)
+      }
     }
   }
 
-  useEffect(() => {
-    if (!router.isReady) return
-
-    const storeId = router.query.storeId
-    getStore(storeId as string)
-  }, [router.isReady])
-
-  function handleKeyPress(e: React.KeyboardEvent<HTMLDivElement>) {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter") {
       handleSubmit(prompt)
     }
   }
+
+  const autoScrollToBottom = () => {
+    if (bottomPageRef.current !== null) {
+      bottomPageRef.current.scrollIntoView({ behavior: "auto" })
+    }
+  }
+
+  const smoothScrollToBottom = () => {
+    if (bottomPageRef.current !== null) {
+      bottomPageRef.current.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
+  useEffect(() => {
+    autoScrollToBottom()
+
+    if (!router.isReady) return
+
+    const storeId = router.query.storeId
+    getStore(storeId as string)
+    if (storeProducts === null) getStoreProducts(storeId as string)
+  }, [router.isReady])
+
+  useEffect(() => {
+    smoothScrollToBottom()
+  }, [isWaitingResponse])
 
   return true ? (
     <Box width="100%" height="100vh">
@@ -235,14 +386,14 @@ const StoreConversationPage = () => {
       >
         <>
           {conversationIsNotEmpty ? (
-            messages.map((message: any, idx: any) => (
-              <ChatStripe
-                message={message.content}
-                isBot={message.role === "assistant"}
-                picSrc=""
-                key={idx}
-              />
-            ))
+            messages.map(
+              (messageWithProducts: MessageWithProducts, idx: any) => (
+                <RichChatStripe
+                  messageWithProducts={messageWithProducts}
+                  key={idx}
+                />
+              )
+            )
           ) : (
             <Box
               width="100%"
@@ -270,10 +421,11 @@ const StoreConversationPage = () => {
           )}
           {isWaitingResponse && (
             <>
-              <ChatStripe message={submittedPrompt!} isBot={false} picSrc="" />
+              <NormalChatStripe content={submittedPrompt!} isBot={false} />
               <LoadingChatStripe isError={isError} />
             </>
           )}
+          <Box ref={bottomPageRef} />
         </>
       </Box>
       <Box
@@ -314,8 +466,8 @@ const StoreConversationPage = () => {
             autoComplete="off"
             style={{
               maxWidth: "770px",
-              marginLeft: "0.5rem",
-              marginRight: "0.5rem",
+              marginLeft: "1rem",
+              marginRight: "1rem",
               marginTop: "2rem",
             }}
             onChange={(e: any) => {
