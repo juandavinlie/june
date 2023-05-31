@@ -46,7 +46,7 @@ const StoreConversationPage = () => {
       )}. Don't justify your answers. Jump straight to the answers. Always provide the product id in the format <ID>{id}</ID>. Talk to me like a human. Respond in markdown format. 
               
       When talking about a particular product, use the following format:
-              
+
       1. {product1_name} - {product1_description}
       
       {product1_id}
@@ -236,7 +236,7 @@ const StoreConversationPage = () => {
           ...[
             {
               role: "assistant",
-              content: `Our store only has the following products available for sale and nothing else: ${context}. I ALWAYS provide the product name and id in the format <ID>{id}</ID> in my response. I ALWAYS respond with product recommendations.`,
+              content: `Our store only has the following products available for sale and nothing else: ${context}. I ALWAYS provide the product name and id in the format <ID>{id}</ID> in my response.`,
             },
           ],
           ...[
