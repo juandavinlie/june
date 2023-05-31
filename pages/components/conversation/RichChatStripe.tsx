@@ -36,11 +36,11 @@ const RichChatStripe = ({ messageWithProducts }: RichChatStripeProps) => {
       <Box display="flex" flexDirection="column" gap="20px">
         {messageWithProducts.productDescriptionPairs &&
           messageWithProducts.productDescriptionPairs.map(
-            (productDescriptionPair: ProductDescriptionPair) => {
+            (productDescriptionPair: ProductDescriptionPair, idx) => {
               const shopifyProduct =
                 productDescriptionPair.product as ShopifyProduct
               return (
-                <Box display="flex" flexDirection="column" gap="20px">
+                <Box display="flex" flexDirection="column" gap="20px" key={idx}>
                   <Typography>{productDescriptionPair.description}</Typography>
                   {productDescriptionPair.product && (
                     <ConversationShopifyProductCard

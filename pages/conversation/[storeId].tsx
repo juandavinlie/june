@@ -43,7 +43,23 @@ const StoreConversationPage = () => {
       role: "user",
       content: `You are a store assistant with the main objective of persuading me to buy products from your store which sells ${categories.join(
         ", "
-      )}. Don't justify your answers. Jump straight to the answers. Always provide the product id in the format <ID>{id}</ID>. Talk to me like a human. Respond in markdown format.`,
+      )}. Don't justify your answers. Jump straight to the answers. Always provide the product id in the format <ID>{id}</ID>. Talk to me like a human. Respond in markdown format. 
+              
+      When talking about a particular product, use the following format:
+              
+      1. {product1_name} - {product1_description}
+      
+      {product1_id}
+
+      2. {product2_name} - {product2_description}
+      
+      {product2_id}
+
+      Please note that in the case of unknown product_id, you can use the format:
+      
+      1. {product1_name} - {product1_description}
+    
+      `,
     },
     {
       role: "assistant",
@@ -226,23 +242,7 @@ const StoreConversationPage = () => {
           ...[
             {
               role: "user",
-              content: `${prompt}. 
-              
-              When talking about a particular product, use the following format:
-              
-              1. {product1_name} - {product1_description}
-              
-              {product1_id}
-        
-              2. {product2_name} - {product2_description}
-              
-              {product2_id}
-
-              Please note that in the case of unknown product_id, you can use the format:
-              
-              1. {product1_name} - {product1_description}
-              
-              `,
+              content: `${prompt}.`,
             },
           ],
         ]
