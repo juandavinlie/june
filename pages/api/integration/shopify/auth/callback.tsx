@@ -51,6 +51,8 @@ export default async function handler(
         throw "Shop response not ok"
       }
 
+      console.log("shopResponse is ok")
+
       // Fetch Products Data
       const productsResponse = await fetch(
         `https://${callbackSession.shop}/admin/api/${LATEST_API_VERSION}/products.json`,
@@ -63,6 +65,8 @@ export default async function handler(
       if (!productsResponse.ok) {
         throw "Products response not ok"
       }
+
+      console.log("productResponse is ok")
 
       // Create Store
       const shopData = await shopResponse.json()
@@ -86,6 +90,7 @@ export default async function handler(
       if (error) {
         throw "Error upserting store"
       }
+      console.log("createStore is ok")
 
       // Sync Products
       const productsData = await productsResponse.json()
@@ -116,6 +121,7 @@ export default async function handler(
           console.log(error.message)
         }
       }
+      console.log("getting products is ok")
 
       res.redirect(`/store/${storeId}`)
     } else {
