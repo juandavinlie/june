@@ -1,10 +1,10 @@
-import { Product } from "@/pages/models/Product"
-import { ShopifyProduct } from "@/pages/models/ShopifyProduct"
+import { Product } from "@/models/Product"
+import { ShopifyProduct } from "@/models/ShopifyProduct"
 import { Box, Typography } from "@mui/material"
 import ConversationShopifyProductCard from "./shopify/ConversationShopifyProductCard"
 import PersonIcon from "@mui/icons-material/Person"
 import SmartToyIcon from "@mui/icons-material/SmartToy"
-import { ProductDescriptionPair } from "@/pages/models/ProductDescriptionPair"
+import { ProductDescriptionPair } from "@/models/ProductDescriptionPair"
 
 export interface Message {
   role: string

@@ -1,4 +1,4 @@
-import { Store } from "@/pages/models/Store"
+import { Store } from "@/models/Store"
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
 interface UserStoresState {

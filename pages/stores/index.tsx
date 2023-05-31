@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material"
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import StoreCard from "../components/StoreCard"
-import { Store } from "../models/Store"
+import { Store } from "../../models/Store"
 import { RootState } from "@/redux/config"
 import Link from "next/link"
 

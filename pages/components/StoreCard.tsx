@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material"
 import Link from "next/link"
-import { Store } from "../models/Store"
+import { Store } from "../../models/Store"
 import IntegrationLogo from "./IntegrationLogo"
 import shopifyLogo from "../../public/shopify.png"
 

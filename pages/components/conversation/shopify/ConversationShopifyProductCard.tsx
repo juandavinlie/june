@@ -1,6 +1,6 @@
 import { Box, Divider, Typography } from "@mui/material"
 import { useState } from "react"
-import { ShopifyProduct } from "../../../models/ShopifyProduct"
+import { ShopifyProduct } from "../../../../models/ShopifyProduct"
 
 interface ConversationShopifyProductCardProps {
   product: ShopifyProduct

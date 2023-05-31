@@ -1,19 +1,19 @@
 import { Box, InputAdornment, TextField, Typography } from "@mui/material"
 import { useRouter } from "next/router"
 import { useEffect, useRef, useState } from "react"
-import { Store } from "../models/Store"
+import { Store } from "../../models/Store"
 import SendIcon from "@mui/icons-material/Send"
 import { Configuration, OpenAIApi } from "openai"
 import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "@/redux/config"
-import { ShopifyProduct } from "../models/ShopifyProduct"
+import { ShopifyProduct } from "../../models/ShopifyProduct"
 import { addProducts } from "@/redux/ProductsSlice"
 import LoadingChatStripe from "../components/conversation/LoadingChatStripe"
 import NormalChatStripe from "../components/conversation/NormalChatStripe"
 import RichChatStripe, {
   MessageWithProducts,
 } from "../components/conversation/RichChatStripe"
-import { ProductDescriptionPair } from "../models/ProductDescriptionPair"
+import { ProductDescriptionPair } from "../../models/ProductDescriptionPair"
 
 const configuration = new Configuration({
   apiKey: "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",

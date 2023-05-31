@@ -1,5 +1,5 @@
-import { Product } from "@/pages/models/Product"
-import { Store } from "@/pages/models/Store"
+import { Product } from "@/models/Product"
+import { Store } from "@/models/Store"
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
 interface UserStoresProductsState {
