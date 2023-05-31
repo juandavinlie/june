@@ -8,6 +8,8 @@ export async function middleware(req: NextRequest) {
     return res
   } else if (req.nextUrl.pathname.startsWith("/api/auth")) {
     return res
+  } else if (req.nextUrl.pathname.startsWith("/api/stores")) {
+    return res
   } 
   const supabase = createMiddlewareSupabaseClient({ req, res })
   const {
