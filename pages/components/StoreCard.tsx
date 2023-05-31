@@ -1,6 +1,8 @@
 import { Box, Typography } from "@mui/material"
 import Link from "next/link"
 import { Store } from "../models/Store"
+import IntegrationLogo from "./IntegrationLogo"
+import shopifyLogo from "../../public/shopify.png"
 
 interface StoreCardProps {
   store: Store
@@ -20,7 +22,10 @@ const StoreCard = ({ store }: StoreCardProps) => {
         sx={{ "&:hover": { cursor: "pointer", bgcolor: "#D3D3D3" } }}
       >
         <Typography variant="h5">{store.name}</Typography>
-        <Typography variant="h6">{store.integration}</Typography>
+        <IntegrationLogo
+          integration={store.integration}
+          logoSrc={shopifyLogo.src}
+        />
       </Box>
     </Link>
   )

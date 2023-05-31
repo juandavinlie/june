@@ -18,13 +18,6 @@ export const userStoresSlice = createSlice({
     },
     addStore: (state, action: PayloadAction<Store>) => {
       state.stores[action.payload.storeId] = action.payload
-      //   const newPair: { [id: string]: Store } = {}
-      //   newPair[action.payload.storeId] = action.payload
-      //   const newStores = { ...state.stores, newPair }
-      //   return {
-      //     ...state,
-      //     newStores,
-      //   }
     },
   },
 })

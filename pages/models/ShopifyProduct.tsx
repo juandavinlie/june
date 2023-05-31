@@ -5,8 +5,8 @@ export class ShopifyProduct extends Product {
   createdAt: Date
   name: string
   description: string
-  properties: JSON
-  productVariants: JSON
+  properties: [any]
+  productVariants: [any]
   image: string | null
   productTags: string
   storeId: string
@@ -20,7 +20,7 @@ export class ShopifyProduct extends Product {
     this.description = product.description
     this.properties = product.properties
     this.productVariants = product.product_variants
-    this.image = product.image ? product.image.src : null
+    this.image = product.image ? product.image : null
     this.productTags = product.product_tags
     this.storeId = product.store_id
     this.productLink = product.id

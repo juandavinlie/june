@@ -3,15 +3,17 @@ import { useRouter } from "next/router"
 import { useEffect, useRef, useState } from "react"
 import { Store } from "../models/Store"
 import SendIcon from "@mui/icons-material/Send"
-import PersonIcon from "@mui/icons-material/Person"
-import SmartToyIcon from "@mui/icons-material/SmartToy"
 import { Configuration, OpenAIApi } from "openai"
 import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "@/redux/config"
 import { ShopifyProduct } from "../models/ShopifyProduct"
 import { addProducts } from "@/redux/ProductsSlice"
-import ConversationShopifyProductCard from "../components/ConversationShopifyProductCard"
-import { Product } from "../models/Product"
+import LoadingChatStripe from "../components/conversation/LoadingChatStripe"
+import NormalChatStripe from "../components/conversation/NormalChatStripe"
+import RichChatStripe, {
+  MessageWithProducts,
+} from "../components/conversation/RichChatStripe"
+import { ProductDescriptionPair } from "../models/ProductDescriptionPair"
 
 const configuration = new Configuration({
   apiKey: "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",
@@ -19,93 +21,6 @@ const configuration = new Configuration({
 delete configuration.baseOptions.headers["User-Agent"]
 const openai = new OpenAIApi(configuration)
 const model = "gpt-3.5-turbo-0301"
-
-interface Message {
-  role: string
-  content: string
-}
-
-interface MessageWithProducts {
-  message: Message
-  products: [Product]
-}
-
-interface RichChatStripeProps {
-  messageWithProducts: MessageWithProducts
-}
-
-const RichChatStripe = ({ messageWithProducts }: RichChatStripeProps) => {
-  const isBot = messageWithProducts.message.role === "assistant"
-  return (
-    <Box
-      borderBottom="0.1px solid #D3D3D3"
-      width="auto"
-      bgcolor={isBot ? "#f7f7f8" : "#ffffff"}
-      p="36px 70px"
-      display="flex"
-      flexDirection="row"
-      gap="15px"
-    >
-      {isBot ? <SmartToyIcon /> : <PersonIcon />}
-      <Box display="flex" flexDirection="column" gap="20px">
-        <>
-          <Typography>{messageWithProducts.message.content}</Typography>
-          {messageWithProducts.products &&
-            messageWithProducts.products.map((product: Product) => {
-              const shopifyProduct = product as ShopifyProduct
-              return (
-                <ConversationShopifyProductCard
-                  product={shopifyProduct}
-                  key={shopifyProduct.productId}
-                />
-              )
-            })}
-        </>
-      </Box>
-    </Box>
-  )
-}
-
-interface NormalChatStripeProps {
-  content: string
-  isBot: boolean
-}
-
-const NormalChatStripe = ({ content, isBot }: NormalChatStripeProps) => {
-  return (
-    <Box
-      borderBottom="0.1px solid #D3D3D3"
-      width="auto"
-      bgcolor={isBot ? "#f7f7f8" : "#ffffff"}
-      p="36px 70px"
-      display="flex"
-      flexDirection="row"
-      gap="15px"
-    >
-      {isBot ? <SmartToyIcon /> : <PersonIcon />}
-      <Typography>{content}</Typography>
-    </Box>
-  )
-}
-
-const LoadingChatStripe = ({ isError }: { isError: boolean }) => {
-  return (
-    <Box
-      borderBottom="0.1px solid #D3D3D3"
-      width="auto"
-      bgcolor="#f7f7f8"
-      p="36px 70px"
-      display="flex"
-      flexDirection="row"
-      gap="15px"
-    >
-      <SmartToyIcon />
-      <Typography color={!isError ? "black" : "red"}>
-        {!isError ? "..." : "Something went wrong, please try again."}
-      </Typography>
-    </Box>
-  )
-}
 
 const LATEST_FACTOR = 2
 
@@ -128,12 +43,12 @@ const StoreConversationPage = () => {
       role: "user",
       content: `You are a store assistant with the main objective of persuading me to buy products from your store which sells ${categories.join(
         ", "
-      )}. Don't justify your answers. Don't apologize for mistakes. Jump straight to the answers. Be confident in your answers. Always provide the product id in the format <ID>{id}</ID>. Talk to me like a human.`,
+      )}. Don't justify your answers. Jump straight to the answers. Always provide the product id in the format <ID>{id}</ID>. Talk to me like a human. Respond in markdown format.`,
     },
     {
       role: "assistant",
       content:
-        "Sure! I will jump straight to the answer. I will be confident in my answers. I will always provide the product id in the format <ID>{id}</ID> I will talk like a human.",
+        "Sure! I will jump straight to the answer. I will always provide the product id in the format <ID>{id}</ID> I will talk like a human. I will respond in markdown format.",
     },
   ]
 
@@ -188,20 +103,21 @@ const StoreConversationPage = () => {
 
   const getConversationString = () => {
     let conversation = ""
-    for (let i = 0; i < storeInitMessages.length; i++) {
-      const message = storeInitMessages[i]
-      conversation += message.role + ": " + message.content + ". "
-    }
     const latestMessages = getLatestMessages()
-    for (let i = 0; i < latestMessages.length; i++) {
-      const message = latestMessages[i]
+
+    const messages =
+      latestMessages.length === 0 ? storeInitMessages : latestMessages
+
+    for (let i = 0; i < messages.length; i++) {
+      const message = messages[i]
       conversation += message.role + ": " + message.content + ". "
     }
+
     return conversation
   }
 
-  const getMentionedProducts = (paragraph: string) => {
-    const mentionedProducts = []
+  const getMentionedProductDescriptionPairs = (paragraph: string) => {
+    const productDescriptionPairs = []
     let startIdx = 0
     while (true) {
       const openIdTagIdx = paragraph.indexOf("<ID>", startIdx)
@@ -213,12 +129,30 @@ const StoreConversationPage = () => {
       const productId = parseInt(
         paragraph.substring(openIdTagIdx + 4, closeIdTagIdx)
       )
+
+      const description = paragraph.substring(startIdx, openIdTagIdx)
+      let product = null
+
       if (storeProducts && storeProducts[productId]) {
-        mentionedProducts.push(storeProducts[productId])
+        product = storeProducts[productId]
       }
-      startIdx = closeIdTagIdx
+
+      productDescriptionPairs.push(
+        new ProductDescriptionPair(description, product)
+      )
+
+      startIdx = closeIdTagIdx + 5
     }
-    return mentionedProducts
+
+    const remainingText = paragraph.substring(startIdx)
+
+    if (remainingText.length > 0) {
+      productDescriptionPairs.push(
+        new ProductDescriptionPair(remainingText, null)
+      )
+    }
+
+    return productDescriptionPairs
   }
 
   const handleSubmit = async (prompt: string) => {
@@ -233,6 +167,7 @@ const StoreConversationPage = () => {
       setIsWaitingResponse(true)
       setPrompt("")
 
+      // Contextualise Prompt
       let conversation = getConversationString()
       conversation += `last_prompt: ${prompt}`
 
@@ -240,6 +175,7 @@ const StoreConversationPage = () => {
         "name_of_product_in_reference_by_last_prompt",
         "last_prompt",
       ]
+
       const contextualisedPromptResponse = await openai.createChatCompletion({
         model,
         messages: [
@@ -251,20 +187,17 @@ const StoreConversationPage = () => {
       })
 
       let contextualisedPrompt = prompt
-      if (
-        contextualisedPromptResponse &&
-        contextualisedPromptResponse.data &&
-        contextualisedPromptResponse.data.choices &&
-        contextualisedPromptResponse.data.choices[0].message
-      ) {
+      try {
         contextualisedPrompt =
-          contextualisedPromptResponse.data.choices[0].message.content
+          contextualisedPromptResponse.data.choices[0].message!.content
         console.log(contextualisedPrompt)
-      } else {
-        console.log(contextualisedPromptResponse)
+      } catch (error) {
+        console.log(
+          "Contextualised Prompt Response invalid, continuing without Contextualised Prompt"
+        )
       }
 
-      // Get similar embeddings to the contextualised prompt
+      // Get context for the contextualised prompt
       const embeddingsResponse = await fetch(
         `/api/stores/${router.query.storeId}/get_context`,
         {
@@ -286,14 +219,30 @@ const StoreConversationPage = () => {
           ...latestMessages,
           ...[
             {
-              role: "user",
-              content: `Your store only has the following products available for sale and nothing else: ${context}. Always provide the id of the product in the format <ID>{id}</ID> in your response.`,
+              role: "assistant",
+              content: `Our store only has the following products available for sale and nothing else: ${context}. I ALWAYS provide the product name and id in the format <ID>{id}</ID> in my response. I ALWAYS respond with product recommendations.`,
             },
           ],
           ...[
             {
               role: "user",
-              content: `${prompt}.`,
+              content: `${prompt}. 
+              
+              When talking about a particular product, use the following format:
+              
+              1. {product1_name} - {product1_description}
+              
+              {product1_id}
+        
+              2. {product2_name} - {product2_description}
+              
+              {product2_id}
+
+              Please note that in the case of unknown product_id, you can use the format:
+              
+              1. {product1_name} - {product1_description}
+              
+              `,
             },
           ],
         ]
@@ -303,30 +252,32 @@ const StoreConversationPage = () => {
           messages: messagesWithPromptWithContext,
           temperature: 0,
         })
-
-        if (
-          chatResponse &&
-          chatResponse.data &&
-          chatResponse.data.choices &&
-          chatResponse.data.choices[0].message
-        ) {
-          const reply = chatResponse.data.choices[0].message
-          const messagesWithPromptAndReply = [
-            ...messages,
-            ...[{ message: { role: "user", content: prompt }, productIds: [] }],
-            ...[
-              {
-                message: reply,
-                products: getMentionedProducts(reply.content),
-              },
-            ],
-          ]
-          console.log(messagesWithPromptAndReply)
-          setMessages(messagesWithPromptAndReply)
-          setIsWaitingResponse(false)
-        } else {
+        const reply = chatResponse.data.choices[0].message
+        console.log(reply)
+        if (!reply) {
           throw "No reply received from June"
         }
+        const messagesWithPromptAndReply = [
+          ...messages,
+          ...[
+            {
+              message: { role: "user", content: prompt },
+              productDescriptionPairs:
+                getMentionedProductDescriptionPairs(prompt),
+            },
+          ],
+          ...[
+            {
+              message: reply,
+              productDescriptionPairs: getMentionedProductDescriptionPairs(
+                reply!.content
+              ),
+            },
+          ],
+        ]
+        console.log(messagesWithPromptAndReply)
+        setMessages(messagesWithPromptAndReply)
+        setIsWaitingResponse(false)
       } else {
         throw "Embeddings Response is not ok"
       }
@@ -363,7 +314,7 @@ const StoreConversationPage = () => {
 
     const storeId = router.query.storeId
     getStore(storeId as string)
-    if (storeProducts === null) getStoreProducts(storeId as string)
+    getStoreProducts(storeId as string)
   }, [router.isReady])
 
   useEffect(() => {
@@ -421,7 +372,7 @@ const StoreConversationPage = () => {
           )}
           {isWaitingResponse && (
             <>
-              <NormalChatStripe content={submittedPrompt!} isBot={false} />
+              <NormalChatStripe content={submittedPrompt!} />
               <LoadingChatStripe isError={isError} />
             </>
           )}

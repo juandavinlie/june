@@ -6,7 +6,11 @@ import { RootState } from "@/redux/config"
 import { ShopifyProduct } from "@/pages/models/ShopifyProduct"
 import { addProductList } from "@/redux/UserStoresProductsSlice"
 import { Product } from "@/pages/models/Product"
-import ShopifyProductCard from "@/pages/components/ShopifyProductCard"
+import ShopifyProductCard from "@/pages/components/shopify/ShopifyProductCard"
+import Image from "next/image"
+
+import shopifyLogo from "../../../public/shopify.png"
+import IntegrationLogo from "@/pages/components/IntegrationLogo"
 
 const StorePage = () => {
   const router = useRouter()
@@ -137,7 +141,10 @@ const StorePage = () => {
   return store ? (
     <Box display="flex" flexDirection="column" p="20px" gap="10px">
       <Typography variant="h3">{store.name}</Typography>
-      <Typography variant="h6">{store.integration}</Typography>
+      <IntegrationLogo
+        integration={store.integration}
+        logoSrc={shopifyLogo.src}
+      />
       <Box
         display="flex"
         flexDirection="column"
