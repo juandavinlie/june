@@ -187,7 +187,7 @@ const StorePage = () => {
         </Box>
       </Box>
       <Typography variant="h5">Products</Typography>
-      {products.map((product: Product) => {
+      {products && products.map((product: Product) => {
         if (store.integration === "shopify") {
           const shopifyProduct = product as ShopifyProduct
           return (
