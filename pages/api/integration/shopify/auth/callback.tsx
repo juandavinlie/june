@@ -97,6 +97,7 @@ export default async function handler(
       const productsList: [] = productsData.products
 
       for (let i = 0; i < productsList.length; i++) {
+        console.log("product " + i)
         const product: any = productsList[i]
         const { data, error } = await supabaseServerClient
           .from("shopify_product")
