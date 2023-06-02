@@ -20,7 +20,7 @@ const configuration = new Configuration({
 })
 delete configuration.baseOptions.headers["User-Agent"]
 const openai = new OpenAIApi(configuration)
-const model = "gpt-3.5-turbo-0301"
+const model = "gpt-3.5-turbo"
 
 const LATEST_FACTOR = 2
 
@@ -38,27 +38,63 @@ const StoreConversationPage = () => {
 
   const categories = ["snowboards", "wax", "gift card"]
 
+  const getSystemMessage = (context: string) => {
+    return [
+      {
+        role: "user",
+        content: `You are a store assistant with the main objective of persuading me to buy products from your store that sells ${categories.join(
+          ", "
+        )}. Your store ONLY sells the following products: ${context}. Your response must ONLY be STRICTLY based on these products and NOTHING MORE. When asked about products you don't have information on or do not sell, simply say "I don't have the relevant information". Don't justify your answers. Talk to me like a human. Respond in markdown format. 
+              
+      When talking about multiple products, you always end a product's description with its product id, use the following format:
+
+      1. {product1_name} - {product1_description}
+      
+      <ID>{product1_id}</ID>
+
+      2. {product2_name} - {product2_description}
+      
+      <ID>{product2_id}</ID>
+
+      Note that product_description is optional, however product_name and product_id are compulsory EVERYTIME. You ALWAYS PROVIDE the product id whenever talking about a particular product so that the user understands which product you are referring to.
+
+      `,
+      },
+    ]
+  }
+
+  const reminderMessages = [
+    {
+      role: "user",
+      content:
+        "Remember to always provide the product id whenever a product name is mentioned with the format: {product_name} <ID>{product_id}</ID>.",
+    },
+    {
+      role: "assistant",
+      content:
+        "I will always provide the product name and id with the format: {product_name} <ID>{product_id}</ID>.",
+    },
+  ]
+
   const storeInitMessages = [
     {
       role: "user",
       content: `You are a store assistant with the main objective of persuading me to buy products from your store which sells ${categories.join(
         ", "
-      )}. Don't justify your answers. Jump straight to the answers. Always provide the product id in the format <ID>{id}</ID>. Talk to me like a human. Respond in markdown format. 
+      )}. Don't justify your answers. Jump straight to the answers. Talk to me like a human. Respond in markdown format. 
               
-      When talking about a particular product, use the following format:
+      When talking about multiple products, always end a product's description with its product id, use the following format:
 
       1. {product1_name} - {product1_description}
       
-      {product1_id}
+      <ID>{product1_id}</ID>
 
       2. {product2_name} - {product2_description}
       
-      {product2_id}
+      <ID>{product2_id}</ID>
 
-      Please note that in the case of unknown product_id, you can use the format:
-      
-      1. {product1_name} - {product1_description}
-    
+      Note that product_description is optional, however product_name and product_id are COMPULSORY EVERYTIME.
+
       `,
     },
     {
@@ -184,34 +220,34 @@ const StoreConversationPage = () => {
       setPrompt("")
 
       // Contextualise Prompt
-      let conversation = getConversationString()
-      conversation += `last_prompt: ${prompt}`
+      // let conversation = getConversationString()
+      // conversation += `last_prompt: ${prompt}`
 
-      const keys = [
-        "name_of_product_in_reference_by_last_prompt",
-        "last_prompt",
-      ]
+      // const keys = [
+      //   "name_of_product_in_reference_by_last_prompt",
+      //   "last_prompt",
+      // ]
 
-      const contextualisedPromptResponse = await openai.createChatCompletion({
-        model,
-        messages: [
-          {
-            role: "user",
-            content: `Conversation: ${conversation}. From the conversation only, pick the appropriate values for only the keys: (${keys}) and nothing more. Base your answer only on the conversation given and nothing more. Format it in JSON.`,
-          },
-        ],
-      })
+      // const contextualisedPromptResponse = await openai.createChatCompletion({
+      //   model,
+      //   messages: [
+      //     {
+      //       role: "user",
+      //       content: `Conversation: ${conversation}. From the conversation only, pick the appropriate values for only the keys: (${keys}) and nothing more. Base your answer only on the conversation given and nothing more. Format it in JSON.`,
+      //     },
+      //   ],
+      // })
 
-      let contextualisedPrompt = prompt
-      try {
-        contextualisedPrompt =
-          contextualisedPromptResponse.data.choices[0].message!.content
-        console.log(contextualisedPrompt)
-      } catch (error) {
-        console.log(
-          "Contextualised Prompt Response invalid, continuing without Contextualised Prompt"
-        )
-      }
+      // let contextualisedPrompt = prompt
+      // try {
+      //   contextualisedPrompt =
+      //     contextualisedPromptResponse.data.choices[0].message!.content
+      //   console.log(contextualisedPrompt)
+      // } catch (error) {
+      //   console.log(
+      //     "Contextualised Prompt Response invalid, continuing without Contextualised Prompt"
+      //   )
+      // }
 
       // Get context for the contextualised prompt
       const embeddingsResponse = await fetch(
@@ -219,7 +255,7 @@ const StoreConversationPage = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: contextualisedPrompt }),
+          body: JSON.stringify({ prompt }),
         }
       )
 
@@ -230,15 +266,10 @@ const StoreConversationPage = () => {
 
         const latestMessages = getLatestMessages()
         console.log(latestMessages)
-        const messagesWithPromptWithContext = [
-          ...storeInitMessages,
+        const contextualisedMessages = [
+          ...getSystemMessage(context),
           ...latestMessages,
-          ...[
-            {
-              role: "assistant",
-              content: `Our store only has the following products available for sale and nothing else: ${context}. I ALWAYS provide the product name and id in the format <ID>{id}</ID> in my response.`,
-            },
-          ],
+          ...reminderMessages,
           ...[
             {
               role: "user",
@@ -246,10 +277,10 @@ const StoreConversationPage = () => {
             },
           ],
         ]
-        console.log(messagesWithPromptWithContext)
+        console.log(contextualisedMessages)
         const chatResponse = await openai.createChatCompletion({
           model,
-          messages: messagesWithPromptWithContext,
+          messages: contextualisedMessages,
           temperature: 0,
         })
         const reply = chatResponse.data.choices[0].message

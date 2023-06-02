@@ -74,7 +74,7 @@ const constructProductEmbeddedString = (product: any, integration: string) => {
       }
     }
 
-    return `(id: ${product.id}, name: ${product.name}, description: ${product.description}, image: ${product.image}, tags: (${product.product_tags}), link: ${product.product_link}, properties: (${propertiesStringified}), variants: (${variantsStringified}).)`
+    return `(id: ${product.id}, name: ${product.name}, description: ${product.description}, properties: (${propertiesStringified}), variants: (${variantsStringified}).)`
   }
   return ""
 }
