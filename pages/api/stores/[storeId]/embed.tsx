@@ -67,7 +67,7 @@ const constructProductEmbeddedString = (product: any, integration: string) => {
 
     for (let i = 0; i < variants.length; i++) {
       const variant = variants[i]
-      const variantStr = `(id: ${variant.id}, title: ${variant.title}, price: ${variant.price}, quantity: ${variant.inventory_quantity})`
+      const variantStr = `(id: ${product.id}, title: ${variant.title}, price: ${variant.price}, quantity: ${variant.inventory_quantity})`
       variantsStringified += variantStr
       if (i < variants.length - 1) {
         variantsStringified += ", "

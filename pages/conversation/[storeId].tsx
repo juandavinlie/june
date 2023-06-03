@@ -149,7 +149,23 @@ const StoreConversationPage = () => {
     }
 
     return latestMessages.map((messageWithProducts: MessageWithProducts) => {
-      return messageWithProducts.message
+      const message = messageWithProducts.message
+
+      if (message.role === "user") {
+        return message
+      }
+
+      const splitMessageContent = message.content.split(" ")
+
+      let summarisedMessage = ""
+      let idx = 0
+      while (idx < splitMessageContent.length) {
+        summarisedMessage += splitMessageContent[idx] + " "
+        idx += 2
+      }
+      message.content = summarisedMessage
+
+      return message
     })
   }
 
