@@ -155,13 +155,34 @@ const StoreConversationPage = () => {
         return message
       }
 
-      const splitMessageContent = message.content.split(" ")
-
+      const sentences = message.content.split(/[.?!:\n]/)
       let summarisedMessage = ""
-      let idx = 0
-      while (idx < splitMessageContent.length) {
-        summarisedMessage += splitMessageContent[idx] + " "
-        idx += 2
+      let sentenceIdx = 0
+
+      while (sentenceIdx < sentences.length) {
+        const sentence = sentences[sentenceIdx].trim()
+        if (sentence.length === 0) {
+          sentenceIdx += 1
+          continue
+        }
+
+        const words = sentence.split(" ")
+
+        let wordIdx = 0
+        let summarisedSentence = ""
+
+        while (wordIdx < words.length) {
+          const word = words[wordIdx]
+          summarisedSentence += word + " "
+          if (word === "and" || word[word.length - 1] === ",") {
+            wordIdx += 1
+          } else {
+            wordIdx += 2
+          }
+        }
+
+        summarisedMessage += summarisedSentence + ". "
+        sentenceIdx += 1
       }
       message.content = summarisedMessage
 
@@ -210,6 +231,10 @@ const StoreConversationPage = () => {
       )
 
       startIdx = closeIdTagIdx + 5
+
+      if (paragraph[startIdx] === ".") {
+        startIdx += 2
+      }
     }
 
     const remainingText = paragraph.substring(startIdx)
@@ -281,6 +306,7 @@ const StoreConversationPage = () => {
         console.log(context)
 
         const latestMessages = getLatestMessages()
+        console.log("Done getting latest messages")
         console.log(latestMessages)
         const contextualisedMessages = [
           ...getSystemMessage(context),
