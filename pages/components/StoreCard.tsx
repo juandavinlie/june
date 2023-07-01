@@ -10,7 +10,7 @@ interface StoreCardProps {
 
 const StoreCard = ({ store }: StoreCardProps) => {
   return (
-    <Link href={`/store/${store.storeId}`}>
+    <Link href={`/stores/${store.storeId}`}>
       <Box
         minHeight="90px"
         width="20%"

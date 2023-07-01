@@ -23,6 +23,7 @@ const openai = new OpenAIApi(configuration)
 const model = "gpt-3.5-turbo"
 
 const LATEST_FACTOR = 2
+const NEED_TO_SUMMARISE = false
 
 const StoreConversationPage = () => {
   const router = useRouter()
@@ -37,6 +38,11 @@ const StoreConversationPage = () => {
   const [submittedPrompt, setSubmittedPrompt] = useState<string>("")
 
   const categories = ["snowboards", "wax", "gift card"]
+  const samplePrompts = [
+    "Give me product recommendations",
+    "What is your best-selling product?",
+    "I am buying a gift",
+  ]
 
   const getSystemMessage = (context: string) => {
     return [
@@ -67,12 +73,12 @@ const StoreConversationPage = () => {
     {
       role: "user",
       content:
-        "Remember to always provide the product id whenever a product name is mentioned with the format: {product_name} <ID>{product_id}</ID>.",
+        "Remember to always accompany a product name with its product id: <ID>{product_id}</ID>.",
     },
     {
       role: "assistant",
       content:
-        "I will always provide the product name and id with the format: {product_name} <ID>{product_id}</ID>.",
+        "I will always accompany a product name with its product id: <ID>{product_id}</ID>.",
     },
   ]
 
@@ -116,7 +122,14 @@ const StoreConversationPage = () => {
   const dispatch = useDispatch()
 
   const getStore = async (storeId: string) => {
-    setStore(null)
+    const response = await fetch(`/api/stores/${storeId}`, {
+      method: "GET",
+    })
+    if (response.ok) {
+      const data = await response.json()
+      const store = new Store(data)
+      setStore(store)
+    }
   }
 
   const getStoreProducts = async (storeId: string) => {
@@ -139,7 +152,7 @@ const StoreConversationPage = () => {
     }
   }
 
-  const getLatestMessages = () => {
+  const getLatestMessages = (summarise: boolean) => {
     const numMessages = LATEST_FACTOR * 2
     let latestMessages = []
     if (messages.length <= numMessages) {
@@ -151,7 +164,7 @@ const StoreConversationPage = () => {
     return latestMessages.map((messageWithProducts: MessageWithProducts) => {
       const message = messageWithProducts.message
 
-      if (message.role === "user") {
+      if (message.role === "user" || !summarise) {
         return message
       }
 
@@ -192,7 +205,7 @@ const StoreConversationPage = () => {
 
   const getConversationString = () => {
     let conversation = ""
-    const latestMessages = getLatestMessages()
+    const latestMessages = getLatestMessages(NEED_TO_SUMMARISE)
 
     const messages =
       latestMessages.length === 0 ? storeInitMessages : latestMessages
@@ -305,7 +318,7 @@ const StoreConversationPage = () => {
         const context = data.context
         console.log(context)
 
-        const latestMessages = getLatestMessages()
+        const latestMessages = getLatestMessages(NEED_TO_SUMMARISE)
         console.log("Done getting latest messages")
         console.log(latestMessages)
         const contextualisedMessages = [
@@ -394,17 +407,31 @@ const StoreConversationPage = () => {
     smoothScrollToBottom()
   }, [isWaitingResponse])
 
-  return true ? (
+  return store ? (
     <Box width="100%" height="100vh">
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        width="100%"
+        height="50px"
+        borderBottom="0.5px solid #D3D3D3"
+        bgcolor="black"
+        color="white"
+        p="0 20px"
+      >
+        <Typography>{store!.name}</Typography>
+        <Typography>Powered by June</Typography>
+      </Box>
       <Box
         width="100%"
         position="absolute"
-        top="0"
+        top="50px"
         bottom="150px"
         bgcolor="#ffffff"
         sx={{
           overflowX: "hidden",
-          overflowY: "hidden",
+          overflowY: "overlay",
           "&:hover": { overflowY: "overlay" },
         }}
       >
@@ -432,14 +459,37 @@ const StoreConversationPage = () => {
                 height="60%"
                 display="flex"
                 flexDirection="column"
-                justifyContent="space-around"
                 alignItems="center"
+                gap="50px"
               >
-                <Typography variant="h2">Powered by June</Typography>
-                <Typography variant="h3">Hello!</Typography>
-                <Typography variant="h4">
-                  Get started by typing a prompt below
-                </Typography>
+                <Typography variant="h2">{store!.name}</Typography>
+                <Box display="flex" gap="20px">
+                  {samplePrompts.map((prompt: string) => {
+                    return (
+                      <Box
+                        display="flex"
+                        width="230px"
+                        justifyContent="center"
+                        alignItems="center"
+                        textAlign="center"
+                        border="0.5px solid #D3D3D3"
+                        borderRadius="10px"
+                        p="10px"
+                        sx={{
+                          "&:hover": {
+                            cursor: "pointer",
+                            bgcolor: "#D3D3D3",
+                          },
+                        }}
+                        onClick={() => {
+                          setPrompt(prompt)
+                        }}
+                      >
+                        {prompt}
+                      </Box>
+                    )
+                  })}
+                </Box>
               </Box>
             </Box>
           )}
@@ -479,7 +529,7 @@ const StoreConversationPage = () => {
             margin="dense"
             id="input"
             placeholder={
-              isWaitingResponse ? "Generating response..." : "Ask Bot"
+              isWaitingResponse ? "Generating response..." : "Ask June"
             }
             type="string"
             variant="outlined"

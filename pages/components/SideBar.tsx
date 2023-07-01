@@ -1,6 +1,10 @@
 import { Box, Divider, Typography } from "@mui/material"
 import Link from "next/link"
 
+import LogoutIcon from "@mui/icons-material/Logout"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import { useRouter } from "next/router"
+
 interface MenuButton {
   menuTitle: string
   menuLink: string
@@ -34,8 +38,15 @@ const GrayDivider = () => {
 }
 
 const SideBar = () => {
-  const stores: MenuButton[] = [{menuTitle: "All Stores", menuLink: "/stores"}]
-  const accountOptions: MenuButton[] = [{menuTitle: "Account", menuLink: "/account"}]
+  const supabase = useSupabaseClient()
+  const router = useRouter()
+
+  const stores: MenuButton[] = [
+    { menuTitle: "All Stores", menuLink: "/stores" },
+  ]
+  const accountOptions: MenuButton[] = [
+    { menuTitle: "Preferences", menuLink: "/preferences" },
+  ]
 
   return (
     <Box
@@ -52,6 +63,19 @@ const SideBar = () => {
       <GrayDivider />
       <MenuGroup title="Account" buttons={accountOptions} />
       <GrayDivider />
+      <Box display="flex" p="20px" gap="5px">
+        <LogoutIcon />
+        <Typography
+          variant="h6"
+          sx={{ "&:hover": { cursor: "pointer", color: "black" } }}
+          onClick={async () => {
+            const { error } = await supabase.auth.signOut()
+            router.push("/")
+          }}
+        >
+          Logout
+        </Typography>
+      </Box>
     </Box>
   )
 }

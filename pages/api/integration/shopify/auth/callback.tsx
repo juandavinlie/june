@@ -53,21 +53,6 @@ export default async function handler(
 
       console.log("shopResponse is ok")
 
-      // Fetch Products Data
-      const productsResponse = await fetch(
-        `https://${callbackSession.shop}/admin/api/${LATEST_API_VERSION}/products.json`,
-        {
-          method: "GET",
-          headers: { "X-Shopify-Access-Token": shopify_access_token! },
-        }
-      )
-
-      if (!productsResponse.ok) {
-        throw "Products response not ok"
-      }
-
-      console.log("productResponse is ok")
-
       // Create Store
       const shopData = await shopResponse.json()
 
@@ -92,38 +77,7 @@ export default async function handler(
       }
       console.log("createStore is ok")
 
-      // Sync Products
-      const productsData = await productsResponse.json()
-      const productsList: [] = productsData.products
-
-      for (let i = 0; i < productsList.length; i++) {
-        const product: any = productsList[i]
-        const { data, error } = await supabaseServerClient
-          .from("shopify_product")
-          .upsert(
-            {
-              id: product.id,
-              created_at: product.created_at,
-              name: product.title,
-              description: product.body_html,
-              properties: product.options,
-              product_variants: product.variants,
-              image: product.image ? product.image.src : null,
-              product_tags: product.tags,
-              product_link:
-                i % 2 === 0 ? "www.boarder.com/p/" + product.id : null,
-              store_id: storeId,
-            },
-            { onConflict: "id" }
-          )
-          .select()
-        if (error) {
-          console.log(error.message)
-        }
-      }
-      console.log("getting products is ok")
-
-      res.redirect(`/store/${storeId}`)
+      res.redirect(`/stores/${storeId}/initial`)
     } else {
       throw "Error"
     }

@@ -2,7 +2,7 @@ import { Box } from "@mui/material"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/router"
 
-const AccountPage = () => {
+const PreferencesPage = () => {
   const supabase = useSupabaseClient()
   const router = useRouter()
   return (
@@ -17,4 +17,4 @@ const AccountPage = () => {
   )
 }
 
-export default AccountPage
+export default PreferencesPage

@@ -7,8 +7,11 @@ import StoreCard from "../components/StoreCard"
 import { Store } from "../../models/Store"
 import { RootState } from "@/redux/config"
 import Link from "next/link"
+import AddStorePopup from "../components/stores/AddStorePopup"
 
 const Stores = () => {
+  const [isAddingStore, setIsAddingStore] = useState(false)
+
   const stores: { [id: string]: Store } = useSelector(
     (state: RootState) => state.userStoresSliceReducer.stores
   )
@@ -41,23 +44,31 @@ const Stores = () => {
         Object.values(stores).map((store: Store) => (
           <StoreCard store={store} key={store.storeId} />
         ))}
-      <Link href={``}>
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          minHeight="90px"
-          width="20%"
-          minWidth="200px"
-          p="10px"
-          borderRadius="5px"
-          border="1px solid #D3D3D3"
-          boxShadow="1"
-          sx={{ "&:hover": { cursor: "pointer", bgcolor: "#D3D3D3" } }}
-        >
-          <Typography>Add Store</Typography>
-        </Box>
-      </Link>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        minHeight="90px"
+        width="20%"
+        minWidth="200px"
+        p="10px"
+        borderRadius="5px"
+        border="1px solid #D3D3D3"
+        boxShadow="1"
+        onClick={() => {
+          setIsAddingStore(true)
+        }}
+        sx={{ "&:hover": { cursor: "pointer", bgcolor: "#D3D3D3" } }}
+      >
+        <Typography>Add Store</Typography>
+      </Box>
+      {isAddingStore && (
+        <AddStorePopup
+          removePopup={() => {
+            setIsAddingStore(false)
+          }}
+        />
+      )}
     </Box>
   )
 }

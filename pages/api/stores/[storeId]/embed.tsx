@@ -3,7 +3,6 @@ import {
   SupabaseClient,
 } from "@supabase/auth-helpers-nextjs"
 import { NextApiRequest, NextApiResponse } from "next"
-import { Configuration, OpenAIApi } from "openai"
 import { openai } from "../../config/openai"
 
 const getProductTableName = (integration: string) => {
@@ -133,16 +132,16 @@ export default async function handler(
 
       // TODO: Embed orders data
 
-      await updateIsEmbeddingStatus(
-        supabaseServerClient,
-        storeId as string,
-        false
-      )
-
       await updateHasEmbeddingStatus(
         supabaseServerClient,
         storeId as string,
         true
+      )
+
+      await updateIsEmbeddingStatus(
+        supabaseServerClient,
+        storeId as string,
+        false
       )
 
       res.status(200).json({ status: "Success embedding store data" })
