@@ -8,14 +8,12 @@ interface AddStorePopupProps {
 }
 
 const AddStorePopup = ({ removePopup }: AddStorePopupProps) => {
-  const integrations = [
-    ["Shopify", shopifyLogo],
-  ]
+  const integrations = [["Shopify", shopifyLogo]]
 
   return (
     <Popup removePopup={removePopup}>
       <Box display="flex" gap="10px">
-        {integrations.map((integration: any) => {
+        {integrations.map((integration: any, idx: number) => {
           return (
             <Box
               display="flex"
@@ -27,6 +25,7 @@ const AddStorePopup = ({ removePopup }: AddStorePopupProps) => {
               borderRadius="10px"
               sx={{ "&:hover": { cursor: "pointer", bgcolor: "#D3D3D3" } }}
               onClick={() => {}}
+              key={idx}
             >
               {integration[0]}
             </Box>

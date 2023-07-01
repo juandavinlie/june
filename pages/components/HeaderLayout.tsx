@@ -22,7 +22,7 @@ const HeaderLayout = ({ children }: HeaderLayoutProps) => {
           paths.map((path: string, idx: number) => {
             const constructedPath = paths.slice(0, idx + 1).join("/")
             return (
-              <Box display="flex">
+              <Box display="flex" key={idx}>
                 <Link href={`/${constructedPath}`}>
                   <Box sx={{ "&:hover": { cursor: "pointer" } }}>
                     <Typography>
