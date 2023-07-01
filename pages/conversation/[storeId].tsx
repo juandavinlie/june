@@ -464,7 +464,7 @@ const StoreConversationPage = () => {
               >
                 <Typography variant="h2">{store!.name}</Typography>
                 <Box display="flex" gap="20px">
-                  {samplePrompts.map((prompt: string) => {
+                  {samplePrompts.map((prompt: string, idx) => {
                     return (
                       <Box
                         display="flex"
@@ -484,6 +484,7 @@ const StoreConversationPage = () => {
                         onClick={() => {
                           setPrompt(prompt)
                         }}
+                        key={idx}
                       >
                         {prompt}
                       </Box>
