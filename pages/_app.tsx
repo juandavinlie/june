@@ -33,7 +33,7 @@ export default function App({ Component, pageProps, ...appProps }: AppProps) {
       initialSession={pageProps.initialSession}
     >
       <Head>
-        <link rel="stylesheet" href="/styles/global.css" />
+        <link rel="stylesheet" href="../styles/global.css" />
       </Head>
       <ThemeProvider theme={themeSettings}>
         <Provider store={store}>
