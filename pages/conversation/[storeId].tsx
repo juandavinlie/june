@@ -127,6 +127,7 @@ const StoreConversationPage = () => {
     })
     if (response.ok) {
       const data = await response.json()
+      console.log(data)
       const store = new Store(data)
       setStore(store)
     }
