@@ -1,4 +1,4 @@
-import "../styles/globals.css"
+import "@/styles/globals.css"
 import { SessionContextProvider } from "@supabase/auth-helpers-react"
 import type { AppProps } from "next/app"
 import { ThemeProvider } from "@emotion/react"
