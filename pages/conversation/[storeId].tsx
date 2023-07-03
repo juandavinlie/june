@@ -122,6 +122,7 @@ const StoreConversationPage = () => {
   const dispatch = useDispatch()
 
   const getStore = async (storeId: string) => {
+    console.log("getting store")
     const response = await fetch(`/api/stores/${storeId}`, {
       method: "GET",
     })
@@ -400,6 +401,7 @@ const StoreConversationPage = () => {
     if (!router.isReady) return
 
     const storeId = router.query.storeId
+    console.log(storeId)
     getStore(storeId as string)
     getStoreProducts(storeId as string)
   }, [router.isReady])
