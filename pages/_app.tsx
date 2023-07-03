@@ -1,4 +1,4 @@
-import "@/styles/globals.css"
+import "../styles/globals.css"
 import { SessionContextProvider } from "@supabase/auth-helpers-react"
 import type { AppProps } from "next/app"
 import { ThemeProvider } from "@emotion/react"
@@ -31,9 +31,9 @@ export default function App({ Component, pageProps, ...appProps }: AppProps) {
       supabaseClient={supabaseClient}
       initialSession={pageProps.initialSession}
     >
-      <Head>
+      {/* <Head>
         <link rel="stylesheet" href="/styles/globals.css" />
-      </Head>
+      </Head> */}
       <ThemeProvider theme={themeSettings}>
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
