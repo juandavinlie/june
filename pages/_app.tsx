@@ -3,7 +3,6 @@ import { SessionContextProvider } from "@supabase/auth-helpers-react"
 import type { AppProps } from "next/app"
 import { ThemeProvider } from "@emotion/react"
 import { themeSettings } from "../theme"
-import HeaderLayout from "./components/HeaderLayout"
 import { Provider } from "react-redux"
 import { persistor, store } from "@/redux/config"
 import { PersistGate } from "redux-persist/integration/react"
@@ -33,7 +32,7 @@ export default function App({ Component, pageProps, ...appProps }: AppProps) {
       initialSession={pageProps.initialSession}
     >
       <Head>
-        <link rel="stylesheet" href="/styles/globals.css" />
+        <link rel="stylesheet" href="../styles/globals.css" />
       </Head>
       <ThemeProvider theme={themeSettings}>
         <Provider store={store}>
