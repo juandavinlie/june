@@ -122,13 +122,11 @@ const StoreConversationPage = () => {
   const dispatch = useDispatch()
 
   const getStore = async (storeId: string) => {
-    console.log("getting store")
     const response = await fetch(`/api/stores/${storeId}`, {
       method: "GET",
     })
     if (response.ok) {
       const data = await response.json()
-      console.log(data)
       const store = new Store(data)
       setStore(store)
     }
@@ -466,7 +464,7 @@ const StoreConversationPage = () => {
                 gap="50px"
               >
                 <Typography variant="h2">{store!.name}</Typography>
-                <Box display="flex" gap="20px">
+                <Box display="flex" flexDirection="column" gap="20px">
                   {samplePrompts.map((prompt: string, idx) => {
                     return (
                       <Box

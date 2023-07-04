@@ -4,7 +4,6 @@ import { createMiddlewareSupabaseClient } from "@supabase/auth-helpers-nextjs"
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
-  console.log(req.nextUrl.pathname)
   if (req.nextUrl.pathname.startsWith("/conversation")) {
     return res
   } else if (req.nextUrl.pathname.startsWith("/api/auth")) {
