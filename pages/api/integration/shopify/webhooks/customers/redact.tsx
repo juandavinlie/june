@@ -1,10 +1,10 @@
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import { NextApiRequest, NextApiResponse } from "next"
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<any>
 ) {
-  console.log("Embedding Products")
-  
+  if (req.method === "POST") {
+    res.status(200).json({ message: "Received customers/redact webhook"})
+  }
 }

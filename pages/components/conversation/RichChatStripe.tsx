@@ -25,7 +25,7 @@ const RichChatStripe = ({ messageWithProducts }: RichChatStripeProps) => {
   return (
     <Box
       borderBottom="0.1px solid #D3D3D3"
-      width="auto"
+      width="100%"
       bgcolor={isBot ? "#f7f7f8" : "#ffffff"}
       p="36px 70px"
       display="flex"

@@ -57,7 +57,16 @@ const SideBar = () => {
       top="0"
       bottom="0"
     >
-      <MenuGroup title="Dashboard" buttons={[]} />
+      <Box display="flex" flexDirection="column" p="20px" gap="15px">
+        <Link href={"/"} key={"/"}>
+          <Typography
+            variant="h5"
+            sx={{ "&:hover": { cursor: "pointer", color: "black" } }}
+          >
+            Home
+          </Typography>
+        </Link>
+      </Box>
       <GrayDivider />
       <MenuGroup title="Stores" buttons={stores} />
       <GrayDivider />

@@ -7,7 +7,6 @@ import { ShopifyProduct } from "@/models/ShopifyProduct"
 import { addProductList } from "@/redux/UserStoresProductsSlice"
 import { Product } from "@/models/Product"
 import ShopifyProductCard from "@/pages/components/shopify/ShopifyProductCard"
-import Image from "next/image"
 
 import shopifyLogo from "../../../public/shopify.png"
 import IntegrationLogo from "@/pages/components/IntegrationLogo"
