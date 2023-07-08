@@ -8,9 +8,14 @@ import { persistor, store } from "@/redux/config"
 import { PersistGate } from "redux-persist/integration/react"
 import SideBarLayout from "./components/SideBarLayout"
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs"
-import { useState } from "react"
+import { createContext, useState } from "react"
+import { useMediaQuery } from "@mui/material"
+
+export const ScreenContext = createContext<boolean>(false)
 
 export default function App({ Component, pageProps, ...appProps }: AppProps) {
+  const useMobileScreen = !useMediaQuery("(min-width:950px)")
+
   const getContent = () => {
     if (
       appProps.router.pathname.startsWith("/login") ||
@@ -30,13 +35,15 @@ export default function App({ Component, pageProps, ...appProps }: AppProps) {
       supabaseClient={supabaseClient}
       initialSession={pageProps.initialSession}
     >
-      <ThemeProvider theme={themeSettings}>
-        <Provider store={store}>
-          <PersistGate loading={null} persistor={persistor}>
-            {getContent()}
-          </PersistGate>
-        </Provider>
-      </ThemeProvider>
+      <ScreenContext.Provider value={useMobileScreen}>
+        <ThemeProvider theme={themeSettings}>
+          <Provider store={store}>
+            <PersistGate loading={null} persistor={persistor}>
+              {getContent()}
+            </PersistGate>
+          </Provider>
+        </ThemeProvider>
+      </ScreenContext.Provider>
     </SessionContextProvider>
   )
 }

@@ -40,7 +40,7 @@ const RichChatStripe = ({ messageWithProducts }: RichChatStripeProps) => {
               const shopifyProduct =
                 productDescriptionPair.product as ShopifyProduct
               return (
-                <Box display="flex" flexDirection="column" gap="20px" key={idx}>
+                <Box display="flex" flexDirection="column" width="auto" gap="20px" key={idx}>
                   <Typography>{productDescriptionPair.description}</Typography>
                   {productDescriptionPair.product && (
                     <ConversationShopifyProductCard

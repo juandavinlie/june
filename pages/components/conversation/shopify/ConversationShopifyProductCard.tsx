@@ -1,6 +1,7 @@
 import { Box, Divider, Typography } from "@mui/material"
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { ShopifyProduct } from "../../../../models/ShopifyProduct"
+import { ScreenContext } from "@/pages/_app"
 
 interface ConversationShopifyProductCardProps {
   product: ShopifyProduct
@@ -10,16 +11,23 @@ const ConversationShopifyProductCard = ({
   product,
 }: ConversationShopifyProductCardProps) => {
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0)
+  const isMobileScreen = useContext(ScreenContext)
   return (
     <Box
       display="flex"
+      flexDirection={isMobileScreen ? "column" : "row"}
       border="0.5px solid #D3D3D3"
       borderRadius="5px"
       gap="10px"
       p="10px"
     >
       {product.image !== null && (
-        <img width="auto" height="300px" src={product.image} />
+        <img
+          width={isMobileScreen ? "100%" : "20%"}
+          height="auto"
+          src={product.image}
+          style={{ objectFit: "contain" }}
+        />
       )}
       <Box display="flex" width="100%" flexDirection="column" gap="10px">
         <Typography variant="h6">{`(id: ${product.productId})`}</Typography>
