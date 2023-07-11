@@ -12,7 +12,7 @@ export async function middleware(req: NextRequest) {
     return res
   } else if (req.nextUrl.pathname.startsWith("/api/integration/shopify/webhooks")) {
     return res
-  } else if (req.nextUrl.pathname.startsWith("/api/integration/shopify/auth/init")) {
+  } else if (req.nextUrl.pathname.startsWith("/api/integration/shopify/auth")) {
     return res
   } 
   const supabase = createMiddlewareSupabaseClient({ req, res })
