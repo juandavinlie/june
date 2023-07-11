@@ -1,13 +1,23 @@
 import SideBar from "./SideBar"
-import { ReactNode, useEffect, useRef, useState } from "react"
+import {
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 import { Box } from "@mui/material"
 import { useSessionContext, useUser } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/router"
 import HeaderLayout from "./HeaderLayout"
+import { ScreenContext } from "../_app"
 
 interface SideBarLayoutProps {
   children: ReactNode
 }
+
+export const SideBarContext = createContext<[boolean, (value: boolean) => void]>([false, () => {}])
 
 const SideBarLayout = ({ children }: SideBarLayoutProps) => {
   const user = useUser()
@@ -18,6 +28,8 @@ const SideBarLayout = ({ children }: SideBarLayoutProps) => {
     width: window.innerWidth,
   })
   const router = useRouter()
+  const isMobileScreen = useContext(ScreenContext)
+  const [showSideBar, setShowSideBar] = useState(false)
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -39,14 +51,17 @@ const SideBarLayout = ({ children }: SideBarLayoutProps) => {
   return (
     user && (
       <Box display="flex">
-        <SideBar />
+        {(!isMobileScreen || showSideBar) && <SideBar />}
         <Box
           position="relative"
-          left="256px"
-          width={`${dimensions.width - 256}px`}
+          left={isMobileScreen ? "0" : "256px"}
+          width={isMobileScreen ? "100%" : `${dimensions.width - 256}px`}
           height="100vh"
+          zIndex="0"
         >
-          <HeaderLayout>{children}</HeaderLayout>
+          <SideBarContext.Provider value={[showSideBar, setShowSideBar]}>
+            <HeaderLayout>{children}</HeaderLayout>
+          </SideBarContext.Provider>
         </Box>
       </Box>
     )

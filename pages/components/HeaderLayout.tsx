@@ -1,10 +1,10 @@
-import { ReactNode } from "react"
+import { ReactNode, useContext, useState } from "react"
 import { Box, Divider, Typography } from "@mui/material"
 import { useRouter } from "next/router"
 
-import ArrowRightIcon from "@mui/icons-material/ArrowRight"
-import slashLogo from "../../public/slash.png"
-import Link from "next/link"
+import MenuIcon from "@mui/icons-material/Menu"
+import { ScreenContext } from "../_app"
+import { SideBarContext } from "./SideBarLayout"
 
 interface HeaderLayoutProps {
   children: ReactNode
@@ -13,27 +13,26 @@ interface HeaderLayoutProps {
 const HeaderLayout = ({ children }: HeaderLayoutProps) => {
   const router = useRouter()
   const paths = router.asPath.split("/").slice(1)
+  const isMobileScreen = useContext(ScreenContext)
+  const [showSideBar, setShowSideBar] = useContext(SideBarContext)
+
   return (
     <Box width="auto">
-      <Box height="62px" display="flex" p="20px">
+      <Box height="62px" display="flex" justifyContent="space-between" p="20px">
+        {isMobileScreen && (
+          <MenuIcon
+            onClick={() => {
+              setShowSideBar(!showSideBar)
+            }}
+            sx={{ "&:hover": { cursor: "pointer" } }}
+          />
+        )}
         {paths.length === 1 && paths[0] === "" ? (
           <Typography>Home</Typography>
         ) : (
-          paths.map((path: string, idx: number) => {
-            const constructedPath = paths.slice(0, idx + 1).join("/")
-            return (
-              <Box display="flex" key={idx}>
-                <Link href={`/${constructedPath}`}>
-                  <Box sx={{ "&:hover": { cursor: "pointer" } }}>
-                    <Typography>
-                      {path.charAt(0).toUpperCase() + path.slice(1)}
-                    </Typography>
-                  </Box>
-                </Link>
-                {idx < paths.length - 1 && <img src={slashLogo.src} />}
-              </Box>
-            )
-          })
+          <Typography>
+            {paths[0].charAt(0).toUpperCase() + paths[0].slice(1)}
+          </Typography>
         )}
       </Box>
       <Divider color="#D3D3D3" />

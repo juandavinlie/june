@@ -105,6 +105,7 @@ export default async function handler(
       const productsList: [] = productsData.products
 
       for (let i = 0; i < productsList.length; i++) {
+        console.log("syncing product " + i)
         const product: any = productsList[i]
         const { data, error } = await supabaseServerClient
           .from(getProductTableName(integration))
@@ -131,7 +132,7 @@ export default async function handler(
           )
         }
       }
-
+      console.log("finished syncing all products")
       await updateSyncTimestamp(supabaseServerClient, storeId as string)
 
       await updateIsSyncingStatus(

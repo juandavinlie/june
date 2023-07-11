@@ -54,8 +54,10 @@ const SideBar = () => {
       height="100vh"
       borderRight="1px solid #D3D3D3"
       position="fixed"
+      bgcolor="white"
       top="0"
       bottom="0"
+      zIndex="1"
     >
       <Box display="flex" flexDirection="column" p="20px" gap="15px">
         <Link href={"/"} key={"/"}>
