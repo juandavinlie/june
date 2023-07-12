@@ -417,7 +417,7 @@ const StoreConversationPage = () => {
         width="100%"
         height="50px"
         borderBottom="0.5px solid #D3D3D3"
-        bgcolor="black"
+        bgcolor="#1c1c1c"
         color="white"
         p="0 20px"
       >

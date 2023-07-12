@@ -10,34 +10,42 @@ import ShopifyProductCard from "@/pages/components/shopify/ShopifyProductCard"
 
 import shopifyLogo from "../../../public/shopify.png"
 import IntegrationLogo from "@/pages/components/IntegrationLogo"
+import { Store } from "@/models/Store"
+import { addStore } from "@/redux/UserStoresSlice"
 
 const StorePage = () => {
   const router = useRouter()
   const dispatch = useDispatch()
+  const { storeId } = router.query
 
   const store = useSelector(
-    (state: RootState) =>
-      state.userStoresSliceReducer.stores[router.query.storeId as string]
+    (state: RootState) => state.userStoresSliceReducer.stores[storeId as string]
   )
 
   const products = useSelector(
     (state: RootState) =>
       state.userStoresProductsSliceReducer.productLists &&
-      state.userStoresProductsSliceReducer.productLists[
-        router.query.storeId as string
-      ]
+      state.userStoresProductsSliceReducer.productLists[storeId as string]
   )
 
   let conversationPageLink = ""
 
   // GETTERS
+  const getStore = async (storeId: string) => {
+    const response = await fetch(`/api/stores/${storeId}`, {
+      method: "GET",
+    })
+    if (response.ok) {
+      const data = await response.json()
+      const store = new Store(data)
+      dispatch(addStore(store))
+    }
+  }
+
   const getProducts = async () => {
-    const response = await fetch(
-      `/api/stores/${store.storeId as string}/products`,
-      {
-        method: "GET",
-      }
-    )
+    const response = await fetch(`/api/stores/${storeId as string}/products`, {
+      method: "GET",
+    })
     if (response.ok) {
       const data = await response.json()
       let formattedProducts = []
@@ -48,7 +56,7 @@ const StorePage = () => {
       }
       dispatch(
         addProductList({
-          storeId: store.storeId,
+          storeId: storeId,
           productList: formattedProducts,
         })
       )
@@ -64,7 +72,7 @@ const StorePage = () => {
 
   const getEmbeddingStatuses = async () => {
     const response = await fetch(
-      `/api/stores/${store.storeId as string}/embeddings`,
+      `/api/stores/${storeId as string}/embeddings`,
       {
         method: "GET",
       }
@@ -82,12 +90,9 @@ const StorePage = () => {
   const [syncTimestamp, setSyncTimestamp] = useState<string | null>(null)
 
   const getSyncingStatuses = async () => {
-    const response = await fetch(
-      `/api/stores/${store.storeId as string}/syncing`,
-      {
-        method: "GET",
-      }
-    )
+    const response = await fetch(`/api/stores/${storeId as string}/syncing`, {
+      method: "GET",
+    })
     if (response.ok) {
       const data = await response.json()
       setIsSyncing(data.is_syncing)
@@ -103,7 +108,7 @@ const StorePage = () => {
   const syncStoreData = async () => {
     setIsSyncing(true)
     console.log("Syncing Store Data")
-    const response = await fetch(`/api/stores/${store.storeId}/sync`, {
+    const response = await fetch(`/api/stores/${storeId}/sync`, {
       method: "POST",
     })
     if (response.ok) {
@@ -113,7 +118,7 @@ const StorePage = () => {
   const embedStoreData = async () => {
     setIsEmbedding(true)
     console.log("Embedding Store Data")
-    const response = await fetch(`/api/stores/${store.storeId}/embed`, {
+    const response = await fetch(`/api/stores/${storeId}/embed`, {
       method: "POST",
     })
     if (response.ok) {
@@ -128,16 +133,17 @@ const StorePage = () => {
   // INITIALISATIONS
   useEffect(() => {
     if (!router.isReady) return
+
+    if (!store) {
+      getStore(storeId as string)
+      syncStoreData()
+    }
   }, [router.isReady])
 
   useEffect(() => {
     if (!store) return
 
-    if (router.query.flags && router.query.flags.includes("initial")) {
-      syncStoreData()
-    }
-
-    conversationPageLink = `${process.env.NEXT_PUBLIC_SHOPIFY_HOST_SCHEME}://${process.env.NEXT_PUBLIC_SHOPIFY_HOST_NAME}/conversation/${store.storeId}`
+    conversationPageLink = `${process.env.NEXT_PUBLIC_SHOPIFY_HOST_SCHEME}://${process.env.NEXT_PUBLIC_SHOPIFY_HOST_NAME}/conversation/${storeId}`
 
     if (!products) {
       getProducts()
@@ -216,7 +222,7 @@ const StorePage = () => {
           <Button
             variant="outlined"
             onClick={() => {
-              openInNewTab(`/conversation/${store.storeId}`)
+              openInNewTab(`/conversation/${storeId}`)
             }}
             sx={{ textTransform: "none" }}
           >

@@ -106,4 +106,5 @@ a {
   border-color: #d3d3d3 !important;
   color: black !important;
   font-weight: 400 !important;
+  text-transform: none !important;
   }

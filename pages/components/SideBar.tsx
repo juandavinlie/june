@@ -57,15 +57,15 @@ const SideBar = () => {
       bgcolor="white"
       top="0"
       bottom="0"
-      zIndex="1"
+      zIndex="2"
     >
       <Box display="flex" flexDirection="column" p="20px" gap="15px">
         <Link href={"/"} key={"/"}>
           <Typography
-            variant="h5"
+            variant="h3"
             sx={{ "&:hover": { cursor: "pointer", color: "black" } }}
           >
-            Home
+            June
           </Typography>
         </Link>
       </Box>

@@ -26,13 +26,10 @@ export default async function handler(
       res,
     })
 
-    // Retrieved Logged In User
+    // Retrieve Logged In User
     const {
       data: { user },
     } = await supabaseServerClient.auth.getUser()
-
-    console.log("Retrieved Supabase Auth Session")
-    console.log(user)
 
     // If user exists and Shopify accessToken is valid, insert a new store
     if (user && callbackSession.accessToken) {
@@ -48,38 +45,20 @@ export default async function handler(
       )
 
       if (!shopResponse.ok) {
-        throw "Shop response not ok"
+        throw "Shop response is not ok"
       }
-
-      console.log("shopResponse is ok")
 
       // Create Store
       const shopData = await shopResponse.json()
 
       const storeId = "shopify_" + shopData.shop.id.toString()
-      const { data, error } = await supabaseServerClient
-        .from("store")
-        .upsert(
-          {
-            id: storeId,
-            user_id: user.id,
-            name: shopData.shop.name,
-            integration: "shopify",
-            shopify_access_token,
-            shopify_domain: callbackSession.shop,
-          },
-          { onConflict: "id" }
-        )
-        .select()
-
-      if (error) {
-        throw "Error upserting store"
-      }
-      console.log("createStore is ok")
-
-      res.redirect(`/stores/${storeId}/initial`)
+      res.redirect(
+        `/stores/?status=new&integration=shopify&shopify_domain=${callbackSession.shop}&shopify_access_token=${shopify_access_token}`
+      )
     } else {
-      throw "Error"
+      res.redirect(
+        `/login?status=new&integration=shopify&shopify_domain=${callbackSession.shop}&shopify_access_token=${shopify_access_token}`
+      )
     }
   } catch (error: any) {
     console.log(error.message)

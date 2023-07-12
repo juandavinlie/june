@@ -27,13 +27,7 @@ const HeaderLayout = ({ children }: HeaderLayoutProps) => {
             sx={{ "&:hover": { cursor: "pointer" } }}
           />
         )}
-        {paths.length === 1 && paths[0] === "" ? (
-          <Typography>Home</Typography>
-        ) : (
-          <Typography>
-            {paths[0].charAt(0).toUpperCase() + paths[0].slice(1)}
-          </Typography>
-        )}
+        <Typography>June</Typography>
       </Box>
       <Divider color="#D3D3D3" />
       {children}

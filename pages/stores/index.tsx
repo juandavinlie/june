@@ -8,14 +8,80 @@ import { Store } from "../../models/Store"
 import { RootState } from "@/redux/config"
 import Link from "next/link"
 import AddStorePopup from "../components/stores/AddStorePopup"
+import { useRouter } from "next/router"
+import { LATEST_API_VERSION } from "@shopify/shopify-api"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
 
 const Stores = () => {
   const [isAddingStore, setIsAddingStore] = useState(false)
+  const [isCreatingNewStore, setIsCreatingNewStore] = useState(false)
 
   const stores: { [id: string]: Store } = useSelector(
     (state: RootState) => state.userStoresSliceReducer.stores
   )
   const dispatch = useDispatch()
+  const router = useRouter()
+  const supabase = useSupabaseClient()
+
+  const isNewUncreatedStore = (params: any) => {
+    return params && params.status === "new"
+  }
+
+  const createNewShopifyStore = async (params: any) => {
+    const shopifyAccessToken = params.shopify_access_token
+    const shopifyDomain = params.shopify_domain
+
+    // Retrieved Logged In User
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    // Fetch Shop Data
+    const shopResponse = await fetch(
+      `/api/integration/shopify/shop?shopify_domain=${shopifyDomain}&shopify_access_token=${shopifyAccessToken}`
+    )
+
+    if (!shopResponse.ok) {
+      throw "Shop response not ok"
+    }
+
+    // Create Store
+    const shopData = await shopResponse.json()
+
+    const storeId = "shopify_" + shopData.shop.id.toString()
+    const { data, error } = await supabase
+      .from("store")
+      .upsert(
+        {
+          id: storeId,
+          user_id: user!.id,
+          name: shopData.shop.name,
+          integration: "shopify",
+          shopify_access_token: shopifyAccessToken,
+          shopify_domain: shopifyDomain,
+        },
+        { onConflict: "id" }
+      )
+      .select()
+
+    if (error) {
+      throw "Error upserting store"
+    }
+    return storeId
+  }
+
+  const createNewStore = async (params: any) => {
+    setIsCreatingNewStore(true)
+    try {
+      if (params.integration === "shopify") {
+        const storeId = await createNewShopifyStore(params)
+        router.push(`/stores/${storeId}`)
+      }
+    } catch (error) {
+      console.log("Creating new store failed!")
+    }
+    setIsCreatingNewStore(false)
+  }
 
   const getStores = async () => {
     const response = await fetch("/api/stores", {
@@ -35,10 +101,17 @@ const Stores = () => {
   }
 
   useEffect(() => {
+    if (!router.isReady) return
+    if (isNewUncreatedStore(router.query)) {
+      createNewStore(router.query)
+    }
+  }, [router.isReady])
+
+  useEffect(() => {
     getStores()
   }, [])
 
-  return (
+  return router.isReady ? (
     <Box display="flex" gap="10px" p="20px">
       {stores &&
         Object.values(stores).map((store: Store) => (
@@ -69,7 +142,21 @@ const Stores = () => {
           }}
         />
       )}
+      {isCreatingNewStore && (
+        <Box
+          position="fixed"
+          bottom="50px"
+          right="50px"
+          boxShadow="2"
+          p="10px 20px"
+          borderRadius="7px"
+        >
+          <Typography variant="h6">Creating new store...</Typography>
+        </Box>
+      )}
     </Box>
+  ) : (
+    "Loading"
   )
 }
 

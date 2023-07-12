@@ -19,5 +19,5 @@ export default function Home() {
     }
   }, [isLoading, user])
 
-  return <Box>{user && <Box>Home</Box>}</Box>
+  return user && <Box p="30px">Welcome to June</Box>
 }

@@ -17,7 +17,9 @@ interface SideBarLayoutProps {
   children: ReactNode
 }
 
-export const SideBarContext = createContext<[boolean, (value: boolean) => void]>([false, () => {}])
+export const SideBarContext = createContext<
+  [boolean, (value: boolean) => void]
+>([false, () => {}])
 
 const SideBarLayout = ({ children }: SideBarLayoutProps) => {
   const user = useUser()
@@ -48,10 +50,33 @@ const SideBarLayout = ({ children }: SideBarLayoutProps) => {
     window.addEventListener("resize", handleResize)
   }, [])
 
+  useEffect(() => {
+    if (!isMobileScreen) {
+      setShowSideBar(false)
+    }
+  }, [isMobileScreen])
+
   return (
     user && (
       <Box display="flex">
         {(!isMobileScreen || showSideBar) && <SideBar />}
+        {isMobileScreen && showSideBar && (
+          <Box
+            position="fixed"
+            top="0"
+            bottom="0"
+            left="0"
+            right="0"
+            zIndex="1"
+            sx={{
+              bgcolor: "black",
+              opacity: 0.6,
+            }}
+            onClick={() => {
+              setShowSideBar(false)
+            }}
+          />
+        )}
         <Box
           position="relative"
           left={isMobileScreen ? "0" : "256px"}
