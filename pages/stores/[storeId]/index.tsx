@@ -200,9 +200,7 @@ const StorePage = () => {
           <Button
             variant="outlined"
             onClick={() => {
-              if (!isSyncing && !isEmbedding) {
-                syncStoreData()
-              }
+              syncStoreData()
             }}
             sx={{ textTransform: "none" }}
           >
@@ -211,9 +209,7 @@ const StorePage = () => {
           <Button
             variant="outlined"
             onClick={() => {
-              if (!isSyncing && !isEmbedding) {
-                embedStoreData()
-              }
+              embedStoreData()
             }}
             sx={{ textTransform: "none" }}
           >
