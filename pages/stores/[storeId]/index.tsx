@@ -228,7 +228,7 @@ const StorePage = () => {
       </Box>
       <Typography variant="h5">
         Store Data:{" "}
-        {isSyncing === null || syncTimestamp === null
+        {isSyncing === null
           ? "Loading..."
           : isSyncing
           ? "In Progress..."
