@@ -18,7 +18,7 @@ export default async function handler(
       .digest("base64")
 
     if (hash !== hmac) {
-      res.status(401).json({ message: "Invalid request" })
+      res.status(401).json({ message: "Unauthorized request" })
     } else {
       res
         .status(200)
