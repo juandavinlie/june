@@ -1,11 +1,14 @@
 import { Box, Divider, Typography } from "@mui/material"
 import { ShopifyProduct } from "../../../models/ShopifyProduct"
+import { useContext } from "react"
+import { ScreenContext } from "@/pages/_app"
 
 interface ShopifyProductCardProps {
   product: ShopifyProduct
 }
 
 const ShopifyProductCard = ({ product }: ShopifyProductCardProps) => {
+  const isMobileScreen = useContext(ScreenContext)
   return (
     <Box
       display="flex"

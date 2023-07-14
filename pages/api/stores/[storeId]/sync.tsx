@@ -85,6 +85,7 @@ export default async function handler(
       )
 
       if (!productsResponse.ok) {
+        console.log(productsResponse.status)
         throw "Products response not ok"
       }
 
