@@ -7,20 +7,26 @@ export default async function handler(
   res: NextApiResponse<any>
 ) {
   if (req.method === "POST") {
-    const secretKey = process.env.NEXT_PUBLIC_SHOPIFY_API_SECRET as string
+    try {
+      const secretKey = process.env.NEXT_PUBLIC_SHOPIFY_API_SECRET as string
 
-    const hmac = req.headers["X-Shopify-Hmac-Sha256"]
+      const hmac = req.headers["X-Shopify-Hmac-Sha256"]
 
-    const rawBody = (await getRawBody(req)) as Buffer
+      const rawBody = (await getRawBody(req)) as Buffer
 
-    const hash = createHmac("sha256", secretKey)
-      .update(rawBody)
-      .digest("base64")
+      const hash = createHmac("sha256", secretKey)
+        .update(rawBody)
+        .digest("base64")
 
-    if (hash !== hmac) {
-      res.status(401).json({ message: "Unauthorized request" })
-    } else {
-      res.status(200).json({ message: "Received shop/redact webhook" })
+      if (hash !== hmac) {
+        res.status(401).json({ message: "Unauthorized request" })
+      } else {
+        res.status(200).json({ message: "Received shop/redact webhook" })
+      }
+    } catch (error) {
+      res
+        .status(401)
+        .json({ message: "Something went wrong. Could not be verified." })
     }
   }
 }
