@@ -33,7 +33,7 @@ export default async function handler(
         })
 
       if (getSimilarContextError) {
-        throw "Getting similar context resulted in error"
+        throw getSimilarContextError
       }
       console.log("finished calling rpc")
 
