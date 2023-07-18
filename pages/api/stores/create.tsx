@@ -6,7 +6,6 @@ export default async function handler(
   res: NextApiResponse<any>
 ) {
   if (req.method === "POST") {
-    console.log(req.body)
     const { user_id, name, integration, shopify_access_token } = req.body
 
     const supabaseServerClient = createServerSupabaseClient({ req, res })

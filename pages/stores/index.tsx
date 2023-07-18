@@ -6,10 +6,7 @@ import { useDispatch, useSelector } from "react-redux"
 import StoreCard from "../components/StoreCard"
 import { Store } from "../../models/Store"
 import { RootState } from "@/redux/config"
-import Link from "next/link"
-import AddStorePopup from "../components/stores/AddStorePopup"
 import { useRouter } from "next/router"
-import { LATEST_API_VERSION } from "@shopify/shopify-api"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 
 const Stores = () => {
@@ -73,10 +70,11 @@ const Stores = () => {
   const createNewStore = async (params: any) => {
     setIsCreatingNewStore(true)
     try {
+      let storeId = null
       if (params.integration === "shopify") {
-        const storeId = await createNewShopifyStore(params)
-        router.push(`/stores/${storeId}`)
+        storeId = await createNewShopifyStore(params)
       }
+      if (storeId) router.push(`/stores/${storeId}`)
     } catch (error) {
       console.log("Creating new store failed!")
     }
@@ -129,19 +127,12 @@ const Stores = () => {
         border="1px solid #D3D3D3"
         boxShadow="1"
         onClick={() => {
-          setIsAddingStore(true)
+          router.push("/stores/add")
         }}
         sx={{ "&:hover": { cursor: "pointer", bgcolor: "#D3D3D3" } }}
       >
         <Typography>Add Store</Typography>
       </Box>
-      {isAddingStore && (
-        <AddStorePopup
-          removePopup={() => {
-            setIsAddingStore(false)
-          }}
-        />
-      )}
       {isCreatingNewStore && (
         <Box
           position="fixed"

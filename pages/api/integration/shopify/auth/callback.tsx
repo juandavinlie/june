@@ -48,7 +48,6 @@ export default async function handler(
         throw "Shop response is not ok"
       }
 
-      // Create Store
       const shopData = await shopResponse.json()
 
       const storeId = "shopify_" + shopData.shop.id.toString()

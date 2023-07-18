@@ -9,9 +9,11 @@ import { Product } from "@/models/Product"
 import ShopifyProductCard from "@/pages/components/shopify/ShopifyProductCard"
 
 import shopifyLogo from "../../../public/shopify.png"
+import emptyLogo from "../../../public/box.png"
 import IntegrationLogo from "@/pages/components/IntegrationLogo"
 import { Store } from "@/models/Store"
 import { addStore } from "@/redux/UserStoresSlice"
+import AddProductPopup from "@/pages/components/stores/AddProductPopup"
 
 const StorePage = () => {
   const router = useRouter()
@@ -27,6 +29,8 @@ const StorePage = () => {
       state.userStoresProductsSliceReducer.productLists &&
       state.userStoresProductsSliceReducer.productLists[storeId as string]
   )
+
+  const newProducts = []
 
   let conversationPageLink = ""
 
@@ -85,7 +89,7 @@ const StorePage = () => {
     }
   }
 
-  // SYNCING STATUSES
+  // SYNCING STATUSES FOR SHOPIFY
   const [isSyncing, setIsSyncing] = useState<boolean | null>(null)
   const [syncTimestamp, setSyncTimestamp] = useState<string | null>(null)
 
@@ -100,12 +104,15 @@ const StorePage = () => {
     }
   }
 
+  // ADDING PRODUCTS
+  const [isAddingProduct, setIsAddingProduct] = useState(false)
+
   // ACTIONS
   const copyConversationPageLink = () => {
     navigator.clipboard.writeText(conversationPageLink)
   }
 
-  const syncStoreData = async () => {
+  const syncShopifyStoreData = async () => {
     setIsSyncing(true)
     console.log("Syncing Store Data")
     const response = await fetch(`/api/stores/${storeId}/sync`, {
@@ -136,7 +143,6 @@ const StorePage = () => {
 
     if (!store) {
       getStore(storeId as string)
-      syncStoreData()
     }
   }, [router.isReady])
 
@@ -197,15 +203,17 @@ const StorePage = () => {
           >
             Copy June Link
           </Button>
-          <Button
-            variant="outlined"
-            onClick={() => {
-              syncStoreData()
-            }}
-            sx={{ textTransform: "none" }}
-          >
-            Sync
-          </Button>
+          {store.integration !== "manual" && (
+            <Button
+              variant="outlined"
+              onClick={() => {
+                syncShopifyStoreData()
+              }}
+              sx={{ textTransform: "none" }}
+            >
+              Sync
+            </Button>
+          )}
           <Button
             variant="outlined"
             onClick={() => {
@@ -226,16 +234,18 @@ const StorePage = () => {
           </Button>
         </Box>
       </Box>
-      <Typography variant="h5">
-        Store Data:{" "}
-        {isSyncing === null
-          ? "Loading..."
-          : isSyncing
-          ? "In Progress..."
-          : syncTimestamp
-          ? `Synced on ${new Date(syncTimestamp)}`
-          : "No yet synced"}
-      </Typography>
+      {store.integration !== "manual" && (
+        <Typography variant="h5">
+          Store Data:{" "}
+          {isSyncing === null
+            ? "Loading..."
+            : isSyncing
+            ? "In Progress..."
+            : syncTimestamp
+            ? `Synced on ${new Date(syncTimestamp)}`
+            : "No yet synced"}
+        </Typography>
+      )}
       <Typography variant="h5">
         Embeddings:{" "}
         {hasEmbeddings === null || isEmbedding === null
@@ -247,7 +257,20 @@ const StorePage = () => {
           : "No embeddings yet"}
       </Typography>
       <Divider />
-      {products &&
+      <Typography>Products</Typography>
+      {store.integration === "manual" && (
+        <Box display="flex">
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setIsAddingProduct(true)
+            }}
+          >
+            Add product
+          </Button>
+        </Box>
+      )}
+      {products.length > 0 ? (
         products.map((product: Product) => {
           if (store.integration === "shopify") {
             const shopifyProduct = product as ShopifyProduct
@@ -258,7 +281,30 @@ const StorePage = () => {
               />
             )
           }
-        })}
+        })
+      ) : (
+        <Box
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          width="100%"
+          height="150px"
+          border="0.5px solid gray"
+          borderRadius="10px"
+          gap="5px"
+        >
+          <img height="50%" src={emptyLogo.src} />
+          No products added yet.
+        </Box>
+      )}
+      {isAddingProduct && (
+        <AddProductPopup
+          removePopup={() => {
+            setIsAddingProduct(false)
+          }}
+        />
+      )}
     </Box>
   ) : (
     <Box>Loading</Box>

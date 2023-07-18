@@ -365,7 +365,8 @@ const StoreConversationPage = () => {
         setMessages(messagesWithPromptAndReply)
         setIsWaitingResponse(false)
       } else {
-        throw "Embeddings Response is not ok"
+        const errorMessage = await embeddingsResponse.json()
+        throw errorMessage
       }
     } catch (error) {
       console.log(error)

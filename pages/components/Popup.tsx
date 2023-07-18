@@ -1,5 +1,5 @@
-import { Box } from "@mui/material"
-import { ReactNode } from "react"
+import { Box, useMediaQuery } from "@mui/material"
+import { ReactNode, useEffect, useState } from "react"
 
 import CloseSharpIcon from "@mui/icons-material/CloseSharp"
 
@@ -9,32 +9,59 @@ interface PopupProps {
 }
 
 const Popup = ({ children, removePopup }: PopupProps) => {
+  const [dimensions, setDimensions] = useState({
+    height: window.innerHeight,
+    width: window.innerWidth,
+  })
+  
+  const getTopMargin = () => {
+    return dimensions.height * 0.5 - 375
+  }
+  const getLeftMargin = () => {
+    return 256 + (dimensions.width - 256) * 0.5 - 375
+  }
+
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions({
+        height: window.innerHeight,
+        width: window.innerWidth,
+      })
+    }
+
+    window.addEventListener("resize", handleResize)
+  }, [])
+  
   return (
-    <Box
-      display="flex"
-      position="absolute"
-      top="0"
-      bottom="0"
-      left="0"
-      right="0"
-      justifyContent="center"
-      alignItems="center"
-      sx={{
-        bgcolor: "black",
-        opacity: 0.6,
-      }}
-      zIndex={0}
-    >
+    <Box>
       <Box
         position="absolute"
-        top="100px"
-        right="100px"
-        sx={{ "&:hover": { cursor: "pointer" } }}
+        top="0"
+        bottom="0"
+        left="0"
+        right="0"
+        justifyContent="center"
+        alignItems="center"
+        sx={{
+          bgcolor: "black",
+          opacity: 0.6,
+        }}
         onClick={removePopup}
+        zIndex={0}
+      />
+      <Box
+        position="fixed"
+        width="750px"
+        height="750px"
+        top={getTopMargin()}
+        left={getLeftMargin()}
+        borderRadius="10px"
+        bgcolor="white"
+        p="15px"
+        zIndex={10}
       >
-        <CloseSharpIcon fontSize="large" style={{ color: "white" }} />
+        {children}
       </Box>
-      <Box zIndex={10}>{children}</Box>
     </Box>
   )
 }

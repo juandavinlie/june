@@ -23,7 +23,7 @@ export const themeSettings = createTheme({
     h5: {
       fontFamily: ["Inter", "sans-serif"].join(","),
       fontWeight: "300",
-      fontSize: 16,
+      fontSize: 14,
     },
     h6: {
       fontFamily: ["Inter", "sans-serif"].join(","),
