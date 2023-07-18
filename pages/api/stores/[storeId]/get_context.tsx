@@ -24,6 +24,7 @@ export default async function handler(
       console.log(embedding)
       const supabaseServerClient = createServerSupabaseClient({ req, res })
       console.log("calling rpc")
+      console.log(storeId)
       const { data: similarContext, error: getSimilarContextError } =
         await supabaseServerClient.rpc(`match_${integration}_store_data`, {
           query_embedding: embedding,
