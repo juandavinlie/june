@@ -30,7 +30,7 @@ export default async function handler(
           query_embedding: embedding,
           match_threshold: 0,
           match_count: 5,
-          store_id: storeId,
+          match_store_id: storeId,
         })
 
       if (getSimilarContextError) {
