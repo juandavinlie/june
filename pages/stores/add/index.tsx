@@ -34,7 +34,7 @@ const AddStorePage = () => {
         rowGap="1rem"
         gridTemplateColumns={`repeat(${!isMobileScreen ? 3 : 2}, 200px)`}
       >
-        {integrations.map((integration: any) => {
+        {integrations.map((integration: any, idx: number) => {
           return (
             <Box
               display="flex"
@@ -49,6 +49,7 @@ const AddStorePage = () => {
                 router.push(integration[2])
               }}
               sx={{ "&:hover": { cursor: "pointer", bgcolor: "#D3D3D3" } }}
+              key={idx}
             >
               <img width="60%" height="60%" src={integration[1].src} />
               <Typography variant="h6">{integration[0]}</Typography>

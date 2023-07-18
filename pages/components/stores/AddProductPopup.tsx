@@ -128,6 +128,7 @@ const AddProductPopup = ({ removePopup }: AddProductPopupProps) => {
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
+                key={idx}
               >
                 <TextField
                   value={variant.name ? variant.name : ""}
