@@ -1,4 +1,6 @@
-import { LATEST_API_VERSION } from "@shopify/shopify-api"
+import {
+  LATEST_API_VERSION,
+} from "@shopify/shopify-api"
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs"
 import type { NextApiRequest, NextApiResponse } from "next"
 import shopify from "../../../config/shopify"
@@ -60,7 +62,6 @@ export default async function handler(
       )
     }
   } catch (error: any) {
-    console.log(error.message)
-    res.status(404).json({ message: error.message })
+    res.redirect("/login")
   }
 }

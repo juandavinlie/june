@@ -107,9 +107,20 @@ const StorePage = () => {
   // ADDING PRODUCTS
   const [isAddingProduct, setIsAddingProduct] = useState(false)
 
+  // COPYING JUNE LINK
+  const [linkIsJustCopied, setLinkIsJustCopied] = useState(false)
+
   // ACTIONS
+  const showCopiedLabel = () => {
+    setLinkIsJustCopied(true)
+    setTimeout(() => {
+      setLinkIsJustCopied(false)
+    }, 3000)
+  }
+
   const copyConversationPageLink = () => {
     navigator.clipboard.writeText(conversationPageLink)
+    showCopiedLabel()
   }
 
   const syncShopifyStoreData = async () => {
@@ -304,6 +315,20 @@ const StorePage = () => {
             setIsAddingProduct(false)
           }}
         />
+      )}
+      {linkIsJustCopied && (
+        <Box
+          position="fixed"
+          bottom="50px"
+          right="50px"
+          boxShadow="2"
+          borderRadius="5px"
+          bgcolor="#2b825b"
+          color="white"
+          p="8px"
+        >
+          <Typography variant="h5">June Link Copied to Clipboard</Typography>
+        </Box>
       )}
     </Box>
   ) : (

@@ -115,7 +115,7 @@ const Stores = () => {
         Object.values(stores).map((store: Store) => (
           <StoreCard store={store} key={store.storeId} />
         ))}
-      <Box
+      {/* <Box
         display="flex"
         alignItems="center"
         justifyContent="center"
@@ -132,7 +132,7 @@ const Stores = () => {
         sx={{ "&:hover": { cursor: "pointer", bgcolor: "#D3D3D3" } }}
       >
         <Typography>Add Store</Typography>
-      </Box>
+      </Box> */}
       {isCreatingNewStore && (
         <Box
           position="fixed"
