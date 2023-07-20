@@ -5,17 +5,17 @@ const PrivacyPolicyPage = () => {
     <Box display="flex" flexDirection="column" gap="10px" p="30px">
       <Typography variant="h4">June Privacy Policy</Typography>
       <Typography variant="h6">
-        June provides an AI store assistant that answers customers' questions to
-        merchants who use Shopify to power their stores. This Privacy Policy
-        describes how personal information is collected, used, and shared when
-        you install or use the App in connection with your Shopify-supported
-        store.
+        June provides an AI store assistant that answers customers&apos;
+        questions to merchants who use Shopify to power their stores. This
+        Privacy Policy describes how personal information is collected, used,
+        and shared when you install or use the App in connection with your
+        Shopify-supported store.
       </Typography>
       <Typography>Personal Information June Collects</Typography>
       <Typography variant="h6">
         When you install June, we are automatically able to access certain types
-        of information from your Shopify account: products (to answer customers'
-        questions).
+        of information from your Shopify account: products (to answer
+        customers&apos; questions).
       </Typography>
       <Typography variant="h6">
         Additionally, we collect the following types of personal information
