@@ -32,8 +32,6 @@ const StorePage = () => {
 
   const newProducts = []
 
-  let conversationPageLink = ""
-
   // GETTERS
   const getStore = async (storeId: string) => {
     const response = await fetch(`/api/stores/${storeId}`, {
@@ -108,6 +106,7 @@ const StorePage = () => {
   const [isAddingProduct, setIsAddingProduct] = useState(false)
 
   // COPYING JUNE LINK
+  const [conversationPageLink, setConversationPageLink] = useState("")
   const [linkIsJustCopied, setLinkIsJustCopied] = useState(false)
 
   // ACTIONS
@@ -119,8 +118,9 @@ const StorePage = () => {
   }
 
   const copyConversationPageLink = () => {
-    navigator.clipboard.writeText(conversationPageLink)
-    showCopiedLabel()
+    if (conversationPageLink) {
+      navigator.clipboard.writeText(conversationPageLink).then(showCopiedLabel)
+    }
   }
 
   const syncShopifyStoreData = async () => {
@@ -152,6 +152,10 @@ const StorePage = () => {
   useEffect(() => {
     if (!router.isReady) return
 
+    setConversationPageLink(
+      `${process.env.NEXT_PUBLIC_SHOPIFY_HOST_SCHEME}://${process.env.NEXT_PUBLIC_SHOPIFY_HOST_NAME}/conversation/${storeId}`
+    )
+
     if (!store) {
       getStore(storeId as string)
     }
@@ -159,8 +163,6 @@ const StorePage = () => {
 
   useEffect(() => {
     if (!store) return
-
-    conversationPageLink = `${process.env.NEXT_PUBLIC_SHOPIFY_HOST_SCHEME}://${process.env.NEXT_PUBLIC_SHOPIFY_HOST_NAME}/conversation/${storeId}`
 
     if (!products) {
       getProducts()

@@ -139,8 +139,10 @@ const Stores = () => {
           bottom="50px"
           right="50px"
           boxShadow="2"
-          p="10px 20px"
-          borderRadius="7px"
+          borderRadius="5px"
+          bgcolor="#2b825b"
+          color="white"
+          p="8px"
         >
           <Typography variant="h6">Creating new store...</Typography>
         </Box>
