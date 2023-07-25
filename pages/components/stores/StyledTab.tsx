@@ -1,4 +1,4 @@
-import { styled, Tab } from "@mui/material"
+import { Box, styled, Tab } from "@mui/material"
 
 interface StyledTabProps {
   label: string
@@ -13,6 +13,8 @@ export const StyledTab = styled((props: StyledTabProps) => (
   fontSize: 14,
 }))
 
-export const Dummy = () => {
-  return <></>
+const Dummy = () => {
+  return <Box>Dummy</Box>
 }
+
+export default Dummy
