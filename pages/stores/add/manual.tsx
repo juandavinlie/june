@@ -1,4 +1,4 @@
-import BorderedBox from "@/pages/components/BorderedBox"
+import BorderedBox from "@/pages/components/common/BorderedBox"
 import { Box, Button, Divider, TextField, Typography } from "@mui/material"
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/router"

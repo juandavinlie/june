@@ -6,23 +6,28 @@ export default async function handler(
   res: NextApiResponse<any>
 ) {
   if (req.method === "POST") {
-    const { user_id, name, integration, shopify_access_token } = req.body
-
+    const { storeId } = req.query
+    const { name, description, properties, variants, image, link } = req.body
+    console.log(properties)
+    console.log(variants)
     const supabaseServerClient = createServerSupabaseClient({ req, res })
-
     const { data, error } = await supabaseServerClient
-      .from("store")
+      .from("manual_product")
       .insert({
-        user_id,
         name,
-        integration,
-        shopify_access_token,
+        description,
+        properties,
+        product_variants: variants,
+        image,
+        product_link: link,
+        store_id: storeId,
       })
       .select()
 
-    if (data) {
-      res.status(201).json(data)
+    if (!error) {
+      res.status(201).json(data[0])
     } else {
+      console.log(error)
       res.status(409).json({ message: error.message })
     }
   }

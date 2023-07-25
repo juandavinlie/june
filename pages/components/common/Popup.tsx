@@ -1,8 +1,6 @@
 import { Box, useMediaQuery } from "@mui/material"
 import { ReactNode, useEffect, useState } from "react"
 
-import CloseSharpIcon from "@mui/icons-material/CloseSharp"
-
 interface PopupProps {
   children: ReactNode
   removePopup: () => void
@@ -13,12 +11,15 @@ const Popup = ({ children, removePopup }: PopupProps) => {
     height: window.innerHeight,
     width: window.innerWidth,
   })
+
+  const popupWidth = 750
+  const popupHeight = 800
   
   const getTopMargin = () => {
-    return dimensions.height * 0.5 - 375
+    return dimensions.height * 0.5 - (popupHeight / 2)
   }
   const getLeftMargin = () => {
-    return 256 + (dimensions.width - 256) * 0.5 - 375
+    return 256 + (dimensions.width - 256) * 0.5 - (popupWidth / 2)
   }
 
   useEffect(() => {
@@ -51,8 +52,8 @@ const Popup = ({ children, removePopup }: PopupProps) => {
       />
       <Box
         position="fixed"
-        width="750px"
-        height="750px"
+        width={popupWidth}
+        height={popupHeight}
         top={getTopMargin()}
         left={getLeftMargin()}
         borderRadius="10px"

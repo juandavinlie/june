@@ -11,7 +11,7 @@ import { Box } from "@mui/material"
 import { useSessionContext, useUser } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/router"
 import HeaderLayout from "./HeaderLayout"
-import { ScreenContext } from "../_app"
+import { ScreenContext } from "../../_app"
 
 interface SideBarLayoutProps {
   children: ReactNode

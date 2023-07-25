@@ -1,8 +1,8 @@
 import { Box, Typography } from "@mui/material"
 import Link from "next/link"
-import { Store } from "../../models/Store"
-import IntegrationLogo from "./IntegrationLogo"
-import shopifyLogo from "../../public/shopify.png"
+import { Store } from "../../../models/Store"
+import IntegrationLogo from "../common/IntegrationLogo"
+import shopifyLogo from "../../../public/shopify.png"
 
 interface StoreCardProps {
   store: Store

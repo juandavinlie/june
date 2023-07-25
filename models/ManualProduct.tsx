@@ -5,7 +5,8 @@ export class ManualProduct extends Product {
   createdAt: Date
   name: string
   description: string
-  productVariants: [any]
+  properties: any[]
+  productVariants: any[]
   image: string | null
   productTags: string
   storeId: string
@@ -17,6 +18,7 @@ export class ManualProduct extends Product {
     this.createdAt = product.created_at
     this.name = product.name
     this.description = product.description
+    this.properties = product.properties
     this.productVariants = product.product_variants
     this.image = product.image ? product.image : null
     this.productTags = product.product_tags

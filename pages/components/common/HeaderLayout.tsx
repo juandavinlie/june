@@ -3,7 +3,7 @@ import { Box, Divider, Typography } from "@mui/material"
 import { useRouter } from "next/router"
 
 import MenuIcon from "@mui/icons-material/Menu"
-import { ScreenContext } from "../_app"
+import { ScreenContext } from "../../_app"
 import { SideBarContext } from "./SideBarLayout"
 
 interface HeaderLayoutProps {
@@ -18,7 +18,7 @@ const HeaderLayout = ({ children }: HeaderLayoutProps) => {
 
   return (
     <Box width="auto">
-      <Box height="62px" display="flex" justifyContent="space-between" p="20px">
+      <Box height="62px" display="flex" justifyContent={isMobileScreen ? "space-between" : "flex-end"} p="20px">
         {isMobileScreen && (
           <MenuIcon
             onClick={() => {

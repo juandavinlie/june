@@ -1,4 +1,10 @@
-import { Box, Button, Divider, Typography } from "@mui/material"
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Divider,
+  Typography,
+} from "@mui/material"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -6,14 +12,15 @@ import { RootState } from "@/redux/config"
 import { ShopifyProduct } from "@/models/ShopifyProduct"
 import { addProductList } from "@/redux/UserStoresProductsSlice"
 import { Product } from "@/models/Product"
-import ShopifyProductCard from "@/pages/components/shopify/ShopifyProductCard"
+import ShopifyProductCard from "@/pages/components/stores/shopify/ShopifyProductCard"
 
 import shopifyLogo from "../../../public/shopify.png"
 import emptyLogo from "../../../public/box.png"
-import IntegrationLogo from "@/pages/components/IntegrationLogo"
+import IntegrationLogo from "@/pages/components/common/IntegrationLogo"
 import { Store } from "@/models/Store"
 import { addStore } from "@/redux/UserStoresSlice"
 import AddProductPopup from "@/pages/components/stores/AddProductPopup"
+import { ManualProduct } from "@/models/ManualProduct"
 
 const StorePage = () => {
   const router = useRouter()
@@ -32,6 +39,9 @@ const StorePage = () => {
 
   const newProducts = []
 
+  // LOADING STATUSES
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false)
+
   // GETTERS
   const getStore = async (storeId: string) => {
     const response = await fetch(`/api/stores/${storeId}`, {
@@ -45,23 +55,37 @@ const StorePage = () => {
   }
 
   const getProducts = async () => {
-    const response = await fetch(`/api/stores/${storeId as string}/products`, {
-      method: "GET",
-    })
-    if (response.ok) {
-      const data = await response.json()
-      let formattedProducts = []
-      if (store.integration === "shopify") {
-        formattedProducts = data.map(
-          (product: any) => new ShopifyProduct(product)
+    try {
+      setIsLoadingProducts(true)
+      const response = await fetch(
+        `/api/stores/${storeId as string}/products`,
+        {
+          method: "GET",
+        }
+      )
+      if (response.ok) {
+        const data = await response.json()
+        let formattedProducts: Product[] = []
+        if (store.integration === "shopify") {
+          formattedProducts = data.map(
+            (product: any) => new ShopifyProduct(product)
+          )
+        } else if (store.integration === "manual") {
+          formattedProducts = data.map(
+            (product: any) => new ManualProduct(product)
+          )
+        }
+        dispatch(
+          addProductList({
+            storeId: storeId,
+            productList: formattedProducts,
+          })
         )
       }
-      dispatch(
-        addProductList({
-          storeId: storeId,
-          productList: formattedProducts,
-        })
-      )
+    } catch (error) {
+      // TODO: throw error here
+    } finally {
+      setIsLoadingProducts(false)
     }
   }
 
@@ -91,10 +115,13 @@ const StorePage = () => {
   const [isSyncing, setIsSyncing] = useState<boolean | null>(null)
   const [syncTimestamp, setSyncTimestamp] = useState<string | null>(null)
 
-  const getSyncingStatuses = async () => {
-    const response = await fetch(`/api/stores/${storeId as string}/syncing`, {
-      method: "GET",
-    })
+  const getShopifySyncingStatuses = async () => {
+    const response = await fetch(
+      `/api/stores/${storeId as string}/shopify/syncing`,
+      {
+        method: "GET",
+      }
+    )
     if (response.ok) {
       const data = await response.json()
       setIsSyncing(data.is_syncing)
@@ -126,7 +153,7 @@ const StorePage = () => {
   const syncShopifyStoreData = async () => {
     setIsSyncing(true)
     console.log("Syncing Store Data")
-    const response = await fetch(`/api/stores/${storeId}/sync`, {
+    const response = await fetch(`/api/stores/${storeId}/shopify/sync`, {
       method: "POST",
     })
     if (response.ok) {
@@ -168,7 +195,7 @@ const StorePage = () => {
       getProducts()
     }
 
-    getSyncingStatuses()
+    if (store.integration === "shopify") getShopifySyncingStatuses()
     getEmbeddingStatuses()
   }, [store])
 
@@ -189,12 +216,14 @@ const StorePage = () => {
   )
 
   useEffect(() => {
+    if (!store || store.integration !== "shopify") return
+
     if (syncIntervalId) {
       clearInterval(syncIntervalId)
       getProducts()
     }
     if (isSyncing) {
-      setSyncIntervalId(setInterval(getSyncingStatuses, 5000))
+      setSyncIntervalId(setInterval(getShopifySyncingStatuses, 5000))
     }
   }, [isSyncing])
 
@@ -283,7 +312,9 @@ const StorePage = () => {
           </Button>
         </Box>
       )}
-      {products.length > 0 ? (
+      {isLoadingProducts ? (
+        <CircularProgress />
+      ) : products ? (
         products.map((product: Product) => {
           if (store.integration === "shopify") {
             const shopifyProduct = product as ShopifyProduct
@@ -293,7 +324,10 @@ const StorePage = () => {
                 key={shopifyProduct.productId}
               />
             )
-          }
+          } 
+          // else if (store.integration === "manual") {
+          //   return <Box>Juan</Box>
+          // }
         })
       ) : (
         <Box
@@ -313,6 +347,7 @@ const StorePage = () => {
       )}
       {isAddingProduct && (
         <AddProductPopup
+          storeId={storeId as string}
           removePopup={() => {
             setIsAddingProduct(false)
           }}

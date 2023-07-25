@@ -1,7 +1,7 @@
 import { Box, Divider, Typography } from "@mui/material"
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/router"
-import BorderedBox from "../components/BorderedBox"
+import BorderedBox from "../components/common/BorderedBox"
 
 const PreferencesPage = () => {
   const supabase = useSupabaseClient()

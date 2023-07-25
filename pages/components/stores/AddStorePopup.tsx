@@ -1,5 +1,5 @@
 import { Box } from "@mui/material"
-import Popup from "../Popup"
+import Popup from "../common/Popup"
 
 import shopifyLogo from "../../../public/shopify.png"
 

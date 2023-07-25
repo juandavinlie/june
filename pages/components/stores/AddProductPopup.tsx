@@ -1,63 +1,161 @@
 import { Box, Button, Divider, TextField, Typography } from "@mui/material"
-import Popup from "../Popup"
+import Popup from "../common/Popup"
 import CameraAltIcon from "@mui/icons-material/CameraAlt"
-import DeleteIcon from "@mui/icons-material/Delete"
-import AddIcon from "@mui/icons-material/Add"
-import { useEffect, useState } from "react"
+import { createContext, useState } from "react"
+import AddProductTabs from "./AddProductTabs"
+import Dropzone from "react-dropzone"
+import Image from "next/image"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import CircularProgress from "@mui/material/CircularProgress"
+
+export interface Property {
+  name: string | null
+  values: string | null
+}
+
+export const PropertiesContext = createContext<
+  [Property[], (properties: Property[]) => void]
+>([[], () => {}])
+
+export interface Variant {
+  name: string | null
+  inventoryQuantity: number | null
+  price: number | null
+}
+
+export const VariantsContext = createContext<
+  [Variant[], (properties: Variant[]) => void]
+>([[], () => {}])
 
 interface AddProductPopupProps {
+  storeId: string
   removePopup: () => void
 }
 
-const AddProductPopup = ({ removePopup }: AddProductPopupProps) => {
+const AddProductPopup = ({ storeId, removePopup }: AddProductPopupProps) => {
+  const [image, setImage] = useState<File | null>(null)
+  const [name, setName] = useState("")
   const [description, setDescription] = useState("")
-  const [variants, setVariants] = useState<any[]>([])
+  const [properties, setProperties] = useState<Property[]>([])
+  const [variants, setVariants] = useState<Variant[]>([])
+  const [link, setLink] = useState("")
 
-  const updateFields = (
-    name: string | null,
-    stock: number | null,
-    idx: number
-  ) => {
-    const copy = variants.slice()
-    const existingRecord = copy[idx]
-    const newRecord = {
-      name: name !== null ? name : existingRecord["name"],
-      stock: stock !== null ? stock : existingRecord["stock"],
+  const [isAdding, setIsAdding] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
+
+  const supabase = useSupabaseClient()
+
+  const addNewProduct = async () => {
+    try {
+      setIsAdding(true)
+
+      // Validation
+      if (!name) throw "Name is required"
+      else if (!description) throw "Description is required"
+      else if (!properties) throw "At least one property is required"
+      else if (!variants) throw "At least one variant is required"
+      else if (!image) throw "Image is required"
+
+      const response = await fetch(
+        `/api/stores/${storeId}/manual/add_product`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            description,
+            properties,
+            variants,
+            image: image ? image!.name : null,
+            link,
+          }),
+        }
+      )
+
+      const productData = await response.json()
+      console.log(productData)
+
+      if (!response.ok) {
+        throw productData.message
+      }
+
+      if (image && productData.image) {
+        const fullImagePath = `${productData.id}_${productData.image}`
+        const { data: imageData, error: imageError } = await supabase.storage
+          .from("/products_images/manual")
+          .upload(fullImagePath, image)
+
+        if (imageError) {
+          console.log(imageError)
+          throw "Image upload failed."
+        }
+      }
+      removePopup()
+    } catch (error) {
+      setErrorMessage(error as string)
+    } finally {
+      setIsAdding(false)
     }
-    copy[idx] = newRecord
-    setVariants(copy)
   }
 
   return (
     <Popup removePopup={removePopup}>
-      <Typography variant="h5">Add New Product</Typography>
+      <Typography variant="title">Add New Product</Typography>
       <Divider />
       <Box height="10px" />
       <Box display="flex" flexDirection="column" gap="10px">
         <Box display="flex" gap="10px">
-          <Box
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            width="250px"
-            height="250px"
-            border="0.5px dashed gray"
-            sx={{ "&:hover": { cursor: "pointer" } }}
+          <Dropzone
+            multiple={false}
+            onDrop={(acceptedFiles: File[]) => {
+              console.log(acceptedFiles[0])
+              setImage(acceptedFiles[0])
+            }}
           >
-            <CameraAltIcon />
-            <Typography variant="h6">Upload a picture</Typography>
-          </Box>
+            {({ getRootProps, getInputProps }) => (
+              <Box
+                {...getRootProps()}
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                alignItems="center"
+                width="250px"
+                height="250px"
+                border="0.5px dashed gray"
+                position="relative"
+                sx={{ "&:hover": { cursor: "pointer" } }}
+              >
+                <input {...getInputProps()} />
+                {!image ? (
+                  <>
+                    <CameraAltIcon />
+                    <Typography variant="h6">Upload a picture</Typography>
+                  </>
+                ) : (
+                  <Image
+                    src={URL.createObjectURL(image)}
+                    alt="Product picture"
+                    fill={true}
+                    style={{ objectFit: "contain" }}
+                  />
+                )}
+              </Box>
+            )}
+          </Dropzone>
           <Box display="flex" flexGrow={1} flexDirection="column" gap="10px">
             <Box
               display="flex"
               justifyContent="space-between"
               alignItems="center"
             >
-              <Typography variant="h5">Product name</Typography>
+              <Typography variant="title">Product name</Typography>
               <TextField
+                value={name}
                 placeholder="e.g. Slim Fit Chino Pants"
                 inputProps={{ style: { fontSize: 14, padding: 5, width: 300 } }}
+                onChange={(e: any) => {
+                  setName(e.currentTarget.value)
+                }}
               />
             </Box>
             <Box
@@ -65,7 +163,7 @@ const AddProductPopup = ({ removePopup }: AddProductPopupProps) => {
               justifyContent="space-between"
               alignItems="center"
             >
-              <Typography variant="h5">Description</Typography>
+              <Typography variant="title">Description</Typography>
               {description && (
                 <Button
                   variant="outlined"
@@ -73,7 +171,7 @@ const AddProductPopup = ({ removePopup }: AddProductPopupProps) => {
                     setDescription("")
                   }}
                 >
-                  <Typography variant="h5">Clear</Typography>
+                  <Typography variant="title">Clear</Typography>
                 </Button>
               )}
             </Box>
@@ -100,94 +198,43 @@ const AddProductPopup = ({ removePopup }: AddProductPopupProps) => {
             </Box>
           </Box>
         </Box>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h5">Variants</Typography>
-          <Button
-            variant="outlined"
-            onClick={() => {
-              setVariants(variants.concat({ name: null, stock: null }))
-            }}
-          >
-            <AddIcon />
-          </Button>
-        </Box>
-        <Box
-          display="flex"
-          flexDirection="column"
-          gap="5px"
-          height="250px"
-          sx={{
-            overflowX: "hidden",
-            overflowY: "overlay",
-            "&:hover": { overflowY: "overlay" },
-          }}
-        >
-          {variants.length > 0 ? (
-            variants.map((variant: any, idx: number) => (
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                key={idx}
-              >
-                <TextField
-                  value={variant.name ? variant.name : ""}
-                  placeholder={`e.g. Green Chino Pants Size M`}
-                  onChange={(e: any) => {
-                    updateFields(e.currentTarget.value, null, idx)
-                  }}
-                  inputProps={{
-                    style: { fontSize: 14, padding: 5, width: 300 },
-                  }}
-                />
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  gap="5px"
-                >
-                  <Typography variant="h5">Stock: </Typography>
-                  <TextField
-                    value={variant.stock ? variant.stock : ""}
-                    onChange={(e: any) => {
-                      updateFields(null, e.currentTarget.value, idx)
-                    }}
-                    inputProps={{
-                      style: { fontSize: 14, padding: 5, width: 50 },
-                    }}
-                  />
-                </Box>
-                <DeleteIcon
-                  onClick={() => {
-                    const newVariants = variants
-                      .slice(0, idx)
-                      .concat(variants.slice(idx + 1))
-                    setVariants(newVariants)
-                  }}
-                />
-              </Box>
-            ))
-          ) : (
-            <Box
-              display="flex"
-              justifyContent="center"
-              border="0.5px solid gray"
-              p="5px"
-            >
-              <Typography variant="h5">No variant added yet</Typography>
-            </Box>
-          )}
-        </Box>
+        <PropertiesContext.Provider value={[properties, setProperties]}>
+          <VariantsContext.Provider value={[variants, setVariants]}>
+            <AddProductTabs />
+          </VariantsContext.Provider>
+        </PropertiesContext.Provider>
         <Box display="flex" flexDirection="column" gap="5px">
-          <Typography variant="h5">Link</Typography>
+          <Typography variant="title">Link (Optional)</Typography>
           <TextField
+            value={link}
             placeholder="e.g. www.example.com/chino_pants"
             inputProps={{ style: { fontSize: 14, padding: 5, width: 300 } }}
+            onChange={(e: any) => {
+              setLink(e.currentTarget.value)
+            }}
           />
         </Box>
         <Box height="10px" />
-        <Box display="flex" justifyContent="flex-end">
-          <Button variant="outlined">Add</Button>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="title" color="red">
+            {errorMessage}
+          </Typography>
+          <Box display="flex" alignItems="center" gap="10px">
+            {isAdding && <CircularProgress color="secondary" size="2rem" />}
+            <Button
+              variant="outlined"
+              disabled={isAdding}
+              onClick={addNewProduct}
+              sx={{
+                "&:disabled": {
+                  backgroundColor: "#cccccc",
+                  color: "white",
+                },
+              }}
+            >
+              <Typography variant="title">Add</Typography>
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Popup>

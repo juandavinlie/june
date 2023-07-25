@@ -1,5 +1,5 @@
 import { Box, Divider, Typography } from "@mui/material"
-import { ShopifyProduct } from "../../../models/ShopifyProduct"
+import { ShopifyProduct } from "../../../../models/ShopifyProduct"
 import { useContext } from "react"
 import { ScreenContext } from "@/pages/_app"
 

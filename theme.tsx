@@ -1,4 +1,24 @@
 import { createTheme } from "@mui/material"
+
+// mui theme settings
+declare module "@mui/material/styles" {
+  interface TypographyVariants {
+    title: React.CSSProperties
+  }
+
+  // allow configuration using `createTheme`
+  interface TypographyVariantsOptions {
+    title?: React.CSSProperties
+  }
+}
+
+// Update the Typography's variant prop options
+declare module "@mui/material/Typography" {
+  interface TypographyPropsVariantOverrides {
+    title: true
+  }
+}
+
 export const themeSettings = createTheme({
   typography: {
     fontFamily: ["Inter", "sans-serif"].join(","),
@@ -29,6 +49,11 @@ export const themeSettings = createTheme({
       fontFamily: ["Inter", "sans-serif"].join(","),
       fontWeight: "300",
       color: "gray",
+      fontSize: 14,
+    },
+    title: {
+      fontFamily: ["Inter", "sans-serif"].join(","),
+      fontWeight: "500",
       fontSize: 14,
     },
   },
