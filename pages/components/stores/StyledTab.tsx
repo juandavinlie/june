@@ -12,3 +12,7 @@ export const StyledTab = styled((props: StyledTabProps) => (
   fontWeight: 500,
   fontSize: 14,
 }))
+
+export const Dummy = () => {
+  return <></>
+}
