@@ -1,7 +1,7 @@
 import { Product } from "@/models/Product"
 import { ShopifyProduct } from "@/models/ShopifyProduct"
 import { Box, Typography } from "@mui/material"
-import ConversationShopifyProductCard from "./shopify/ConversationShopifyProductCard"
+import ConversationProductCard from "./ConversationProductCard"
 import PersonIcon from "@mui/icons-material/Person"
 import SmartToyIcon from "@mui/icons-material/SmartToy"
 import { ProductDescriptionPair } from "@/models/ProductDescriptionPair"
@@ -13,7 +13,7 @@ export interface Message {
 
 export interface MessageWithProducts {
   message: Message
-  productDescriptionPairs: [ProductDescriptionPair]
+  productDescriptionPairs: ProductDescriptionPair[]
 }
 
 interface RichChatStripeProps {
@@ -37,15 +37,20 @@ const RichChatStripe = ({ messageWithProducts }: RichChatStripeProps) => {
         {messageWithProducts.productDescriptionPairs &&
           messageWithProducts.productDescriptionPairs.map(
             (productDescriptionPair: ProductDescriptionPair, idx) => {
-              const shopifyProduct =
-                productDescriptionPair.product as ShopifyProduct
+              const product = productDescriptionPair.product
               return (
-                <Box display="flex" flexDirection="column" width="auto" gap="20px" key={idx}>
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  width="auto"
+                  gap="20px"
+                  key={idx}
+                >
                   <Typography>{productDescriptionPair.description}</Typography>
-                  {productDescriptionPair.product && (
-                    <ConversationShopifyProductCard
-                      product={shopifyProduct}
-                      key={shopifyProduct.productId}
+                  {product && (
+                    <ConversationProductCard
+                      product={product}
+                      key={product.productId}
                     />
                   )}
                 </Box>

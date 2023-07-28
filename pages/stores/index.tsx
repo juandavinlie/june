@@ -1,13 +1,14 @@
 import { setStores } from "@/redux/UserStoresSlice"
 import { Button } from "@mui/base"
 import { Box, Typography } from "@mui/material"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import StoreCard from "../components/stores/StoreCard"
 import { Store } from "../../models/Store"
 import { RootState } from "@/redux/config"
 import { useRouter } from "next/router"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import { HeaderContext } from "../components/common/HeaderLayout"
 
 const Stores = () => {
   const [isAddingStore, setIsAddingStore] = useState(false)
@@ -17,6 +18,7 @@ const Stores = () => {
     (state: RootState) => state.userStoresSliceReducer.stores
   )
   const dispatch = useDispatch()
+  const setHeaderTitle = useContext(HeaderContext)
   const router = useRouter()
   const supabase = useSupabaseClient()
 
@@ -100,6 +102,11 @@ const Stores = () => {
 
   useEffect(() => {
     if (!router.isReady) return
+
+    setHeaderTitle([
+      { text: "Stores", link: "/stores" },
+    ])
+
     if (isNewUncreatedStore(router.query)) {
       createNewStore(router.query)
     }

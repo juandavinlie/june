@@ -4,6 +4,8 @@ import Link from "next/link"
 import LogoutIcon from "@mui/icons-material/Logout"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/router"
+import { useContext } from "react"
+import { SideBarContext } from "./SideBarLayout"
 
 interface MenuButton {
   menuTitle: string
@@ -16,11 +18,18 @@ interface MenuGroupProps {
 }
 
 const MenuGroup = ({ title, buttons }: MenuGroupProps) => {
+  const [showSideBar, setShowSideBar] = useContext(SideBarContext)
   return (
     <Box display="flex" flexDirection="column" p="20px" gap="15px">
       <Typography variant="h5">{title}</Typography>
       {buttons.map((button: MenuButton) => (
-        <Link href={button.menuLink} key={button.menuLink}>
+        <Link
+          href={button.menuLink}
+          key={button.menuLink}
+          onClick={() => {
+            setShowSideBar(false)
+          }}
+        >
           <Typography
             variant="h6"
             sx={{ "&:hover": { cursor: "pointer", color: "black" } }}

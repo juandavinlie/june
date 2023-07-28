@@ -2,11 +2,18 @@ import { Box, Divider, Typography } from "@mui/material"
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/router"
 import BorderedBox from "../components/common/BorderedBox"
+import { useContext, useEffect } from "react"
+import { HeaderContext } from "../components/common/HeaderLayout"
 
 const PreferencesPage = () => {
-  const supabase = useSupabaseClient()
-  const router = useRouter()
+  const setHeaderTitle = useContext(HeaderContext)
   const user = useUser()
+
+  useEffect(() => {
+    setHeaderTitle([
+      { text: "Preferences", link: "/preferences" },
+    ])
+  }, [])
 
   return user ? (
     <BorderedBox>

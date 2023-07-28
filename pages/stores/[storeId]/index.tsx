@@ -1,18 +1,12 @@
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Divider,
-  Typography,
-} from "@mui/material"
+import { Box, Button, Divider, Typography } from "@mui/material"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "@/redux/config"
 import { ShopifyProduct } from "@/models/ShopifyProduct"
 import { addProductList } from "@/redux/UserStoresProductsSlice"
 import { Product } from "@/models/Product"
-import ShopifyProductCard from "@/pages/components/stores/shopify/ShopifyProductCard"
+import ProductCard from "@/pages/components/stores/shopify/ProductCard"
 
 import shopifyLogo from "../../../public/shopify.png"
 import emptyLogo from "../../../public/box.png"
@@ -21,10 +15,14 @@ import { Store } from "@/models/Store"
 import { addStore } from "@/redux/UserStoresSlice"
 import AddProductPopup from "@/pages/components/stores/AddProductPopup"
 import { ManualProduct } from "@/models/ManualProduct"
+import LoadingWidget from "@/pages/components/common/LoadingWidget"
+import { Title, HeaderContext } from "@/pages/components/common/HeaderLayout"
+import { openInNewTab } from "@/utils"
 
 const StorePage = () => {
   const router = useRouter()
   const dispatch = useDispatch()
+  const setHeaderTitle = useContext(HeaderContext)
   const { storeId } = router.query
 
   const store = useSelector(
@@ -170,11 +168,6 @@ const StorePage = () => {
     }
   }
 
-  const openInNewTab = (url: string) => {
-    const newWindow = window.open(url, "_blank", "noopener,noreferrer")
-    if (newWindow) newWindow.opener = null
-  }
-
   // INITIALISATIONS
   useEffect(() => {
     if (!router.isReady) return
@@ -191,9 +184,11 @@ const StorePage = () => {
   useEffect(() => {
     if (!store) return
 
-    if (!products) {
-      getProducts()
-    }
+    setHeaderTitle([
+      { text: "Stores", link: "/stores" },
+      { text: store.name, link: `/stores/${storeId as string}` },
+    ])
+    getProducts()
 
     if (store.integration === "shopify") getShopifySyncingStatuses()
     getEmbeddingStatuses()
@@ -313,21 +308,10 @@ const StorePage = () => {
         </Box>
       )}
       {isLoadingProducts ? (
-        <CircularProgress />
-      ) : products ? (
-        products.map((product: Product) => {
-          if (store.integration === "shopify") {
-            const shopifyProduct = product as ShopifyProduct
-            return (
-              <ShopifyProductCard
-                product={shopifyProduct}
-                key={shopifyProduct.productId}
-              />
-            )
-          } 
-          // else if (store.integration === "manual") {
-          //   return <Box>Juan</Box>
-          // }
+        <LoadingWidget color="black" text="Loading store products..." />
+      ) : products.length > 0 ? (
+        products.map((product: Product, idx: number) => {
+          return <ProductCard product={product} key={product.productId} />
         })
       ) : (
         <Box
@@ -349,6 +333,7 @@ const StorePage = () => {
         <AddProductPopup
           storeId={storeId as string}
           removePopup={() => {
+            getProducts()
             setIsAddingProduct(false)
           }}
         />

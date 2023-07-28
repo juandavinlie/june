@@ -4,6 +4,8 @@ import { NextApiRequest, NextApiResponse } from "next"
 const getProductTableName = (integration: string) => {
   if (integration === "shopify") {
     return "shopify_product"
+  } else if (integration === "manual") {
+    return "manual_product"
   }
   return ""
 }
@@ -22,7 +24,7 @@ export default async function handler(
       .from(getProductTableName(integration))
       .select()
       .eq("store_id", storeId)
-
+    console.log(data)
     if (!error) {
       res.status(200).json(data)
     } else {

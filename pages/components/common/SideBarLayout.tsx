@@ -58,37 +58,37 @@ const SideBarLayout = ({ children }: SideBarLayoutProps) => {
 
   return (
     user && (
-      <Box display="flex">
-        {(!isMobileScreen || showSideBar) && <SideBar />}
-        {isMobileScreen && showSideBar && (
+      <SideBarContext.Provider value={[showSideBar, setShowSideBar]}>
+        <Box display="flex">
+          {(!isMobileScreen || showSideBar) && <SideBar />}
+          {isMobileScreen && showSideBar && (
+            <Box
+              position="fixed"
+              top="0"
+              bottom="0"
+              left="0"
+              right="0"
+              zIndex="1"
+              sx={{
+                bgcolor: "black",
+                opacity: 0.6,
+              }}
+              onClick={() => {
+                setShowSideBar(false)
+              }}
+            />
+          )}
           <Box
-            position="fixed"
-            top="0"
-            bottom="0"
-            left="0"
-            right="0"
-            zIndex="1"
-            sx={{
-              bgcolor: "black",
-              opacity: 0.6,
-            }}
-            onClick={() => {
-              setShowSideBar(false)
-            }}
-          />
-        )}
-        <Box
-          position="relative"
-          left={isMobileScreen ? "0" : "256px"}
-          width={isMobileScreen ? "100%" : `${dimensions.width - 256}px`}
-          height="100vh"
-          zIndex="0"
-        >
-          <SideBarContext.Provider value={[showSideBar, setShowSideBar]}>
+            position="relative"
+            left={isMobileScreen ? "0" : "256px"}
+            width={isMobileScreen ? "100%" : `${dimensions.width - 256}px`}
+            height="100vh"
+            zIndex="0"
+          >
             <HeaderLayout>{children}</HeaderLayout>
-          </SideBarContext.Provider>
+          </Box>
         </Box>
-      </Box>
+      </SideBarContext.Provider>
     )
   )
 }

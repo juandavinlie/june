@@ -105,19 +105,19 @@ const VariantsTab = () => {
   const [variants, setVariants] = useContext(VariantsContext)
 
   const updateVariantFields = (
-    name: string | null,
-    inventoryQuantity: number | null,
+    title: string | null,
+    inventory_quantity: number | null,
     price: number | null,
     idx: number
   ) => {
     const copy = variants.slice()
     const existingRecord = copy[idx]
     const newRecord: Variant = {
-      name: name !== null ? name : existingRecord["name"],
-      inventoryQuantity:
-        inventoryQuantity !== null
-          ? inventoryQuantity
-          : existingRecord["inventoryQuantity"],
+      title: title !== null ? title : existingRecord["title"],
+      inventory_quantity:
+        inventory_quantity !== null
+          ? inventory_quantity
+          : existingRecord["inventory_quantity"],
       price: price !== null ? price : existingRecord["price"],
     }
     copy[idx] = newRecord
@@ -145,7 +145,7 @@ const VariantsTab = () => {
             key={idx}
           >
             <TextField
-              value={variant.name ? variant.name : ""}
+              value={variant.title ? variant.title : ""}
               placeholder={`e.g. Green Chino Pants Size M`}
               onChange={(e: any) => {
                 updateVariantFields(e.currentTarget.value, null, null, idx)
@@ -165,7 +165,7 @@ const VariantsTab = () => {
                 type="number"
                 placeholder="2"
                 value={
-                  variant.inventoryQuantity ? variant.inventoryQuantity : ""
+                  variant.inventory_quantity ? variant.inventory_quantity : ""
                 }
                 onChange={(e: any) => {
                   updateVariantFields(null, e.currentTarget.value, null, idx)
@@ -259,8 +259,8 @@ const AddProductTabs = () => {
             } else if (selectedIndex === 1) {
               setVariants(
                 variants.concat({
-                  name: null,
-                  inventoryQuantity: null,
+                  title: null,
+                  inventory_quantity: null,
                   price: null,
                 })
               )

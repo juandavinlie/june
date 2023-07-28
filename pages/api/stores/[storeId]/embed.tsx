@@ -4,10 +4,14 @@ import {
 } from "@supabase/auth-helpers-nextjs"
 import { NextApiRequest, NextApiResponse } from "next"
 import { openai } from "../../config/openai"
+import { ShopifyProduct } from "@/models/ShopifyProduct"
+import { ManualProduct } from "@/models/ManualProduct"
 
 const getProductTableName = (integration: string) => {
   if (integration === "shopify") {
     return "shopify_product"
+  } else if (integration === "manual") {
+    return "manual_product"
   }
   return ""
 }
@@ -46,38 +50,6 @@ const updateHasEmbeddingStatus = async (
   }
 }
 
-const constructProductEmbeddedString = (product: any, integration: string) => {
-  if (integration === "shopify") {
-    const properties = product.properties
-    let propertiesStringified = ""
-
-    for (let i = 0; i < properties.length; i++) {
-      const property = properties[i]
-      const valuesStr = property.values.join(", ")
-      const propertyStr = `(property_name: ${property.name}, values: ${valuesStr})`
-      propertiesStringified += propertyStr
-      if (i < properties.length - 1) {
-        propertiesStringified += ", "
-      }
-    }
-
-    const variants = product.product_variants
-    let variantsStringified = ""
-
-    for (let i = 0; i < variants.length; i++) {
-      const variant = variants[i]
-      const variantStr = `(id: ${product.id}, title: ${variant.title}, price: ${variant.price}, quantity: ${variant.inventory_quantity})`
-      variantsStringified += variantStr
-      if (i < variants.length - 1) {
-        variantsStringified += ", "
-      }
-    }
-
-    return `(id: ${product.id}, name: ${product.name}, description: ${product.description}, properties: (${propertiesStringified}), variants: (${variantsStringified}).)`
-  }
-  return ""
-}
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<any>
@@ -107,11 +79,17 @@ export default async function handler(
 
       // Embed products data
       for (let i = 0; i < products.length; i++) {
-        const product = products[i]
-        const embeddedProductString = constructProductEmbeddedString(
-          product,
-          integration
-        )
+        let product = null
+
+        if (integration === "shopify") {
+          product = new ShopifyProduct(products[i])
+        } else if (integration === "manual") {
+          product = new ManualProduct(products[i])
+        }
+
+        // const product = products[i]
+        const embeddedProductString = product!.constructEmbeddedString()
+
         const embeddingResponse = await openai.createEmbedding({
           model: "text-embedding-ada-002",
           input: embeddedProductString,
@@ -123,7 +101,7 @@ export default async function handler(
             embedded_string: embeddedProductString,
             embedding,
           })
-          .eq("id", product.id)
+          .eq("id", product!.productId)
 
         if (updateEmbeddingError) {
           throw "Updating of Embedding went wrong"

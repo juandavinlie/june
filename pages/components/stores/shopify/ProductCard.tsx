@@ -2,13 +2,16 @@ import { Box, Divider, Typography } from "@mui/material"
 import { ShopifyProduct } from "../../../../models/ShopifyProduct"
 import { useContext } from "react"
 import { ScreenContext } from "@/pages/_app"
+import { Product } from "@/models/Product"
+import { Variant } from "../AddProductPopup"
 
-interface ShopifyProductCardProps {
-  product: ShopifyProduct
+interface ProductCardProps {
+  product: Product
 }
 
-const ShopifyProductCard = ({ product }: ShopifyProductCardProps) => {
+const ProductCard = ({ product }: ProductCardProps) => {
   const isMobileScreen = useContext(ScreenContext)
+  console.log(product)
   return (
     <Box
       display="flex"
@@ -34,7 +37,7 @@ const ShopifyProductCard = ({ product }: ShopifyProductCardProps) => {
             overflowX: "hidden",
           }}
         >
-          {product.productVariants.map((variant: any, idx) => {
+          {product.productVariants.map((variant: Variant, idx) => {
             return (
               <Box
                 display="flex"
@@ -58,4 +61,4 @@ const ShopifyProductCard = ({ product }: ShopifyProductCardProps) => {
   )
 }
 
-export default ShopifyProductCard
+export default ProductCard

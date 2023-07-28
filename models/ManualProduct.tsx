@@ -25,4 +25,32 @@ export class ManualProduct extends Product {
     this.storeId = product.store_id
     this.productLink = product.id
   }
+
+  constructEmbeddedString(): string {
+    const properties = this.properties
+    let propertiesStringified = ""
+
+    for (let i = 0; i < properties.length; i++) {
+      const property = properties[i]
+      const propertyStr = `(property_name: ${property.name}, values: ${property.values})`
+      propertiesStringified += propertyStr
+      if (i < properties.length - 1) {
+        propertiesStringified += ", "
+      }
+    }
+
+    const variants = this.productVariants
+    let variantsStringified = ""
+
+    for (let i = 0; i < variants.length; i++) {
+      const variant = variants[i]
+      const variantStr = `(id: ${this.productId}, title: ${variant.name}, price: ${variant.price}, quantity: ${variant.inventoryQuantity})`
+      variantsStringified += variantStr
+      if (i < variants.length - 1) {
+        variantsStringified += ", "
+      }
+    }
+
+    return `(id: ${this.productId}, name: ${this.name}, description: ${this.description}, properties: (${propertiesStringified}), variants: (${variantsStringified}).)`
+  }
 }

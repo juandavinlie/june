@@ -18,8 +18,8 @@ export const PropertiesContext = createContext<
 >([[], () => {}])
 
 export interface Variant {
-  name: string | null
-  inventoryQuantity: number | null
+  title: string | null
+  inventory_quantity: number | null
   price: number | null
 }
 
@@ -30,6 +30,21 @@ export const VariantsContext = createContext<
 interface AddProductPopupProps {
   storeId: string
   removePopup: () => void
+}
+
+const processProperties = (properties: Property[]) => {
+  return properties.filter(
+    (property: Property) => property.name !== null && property.values !== null
+  )
+}
+
+const processVariants = (variants: Variant[]) => {
+  return variants.filter(
+    (variant: Variant) =>
+      variant.title !== null &&
+      variant.inventory_quantity !== null &&
+      variant.price !== null
+  )
 }
 
 const AddProductPopup = ({ storeId, removePopup }: AddProductPopupProps) => {
@@ -49,12 +64,38 @@ const AddProductPopup = ({ storeId, removePopup }: AddProductPopupProps) => {
     try {
       setIsAdding(true)
 
+      // Preprocessing
+      const processedProperties = processProperties(properties)
+      const processedVariants = processVariants(variants)
+      console.log("properties")
+      console.log(processedProperties)
+      console.log("variants")
+      console.log(processedVariants)
       // Validation
       if (!name) throw "Name is required"
       else if (!description) throw "Description is required"
-      else if (!properties) throw "At least one property is required"
-      else if (!variants) throw "At least one variant is required"
+      else if (processedProperties.length === 0)
+        throw "At least one property is required"
+      else if (processedVariants.length === 0)
+        throw "At least one variant is required"
       else if (!image) throw "Image is required"
+
+      const imageId = crypto.randomUUID()
+      const fullImagePath = `${imageId}_${image!.name}`
+      const bucketName = `/products_images/manual/${storeId}`
+
+      const { data: imageData, error: imageError } = await supabase.storage
+        .from(bucketName)
+        .upload(fullImagePath, image)
+
+      if (imageError) {
+        console.log(imageError)
+        throw "Image upload failed."
+      }
+
+      const { data: imageUrlData } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(fullImagePath)
 
       const response = await fetch(
         `/api/stores/${storeId}/manual/add_product`,
@@ -64,9 +105,9 @@ const AddProductPopup = ({ storeId, removePopup }: AddProductPopupProps) => {
           body: JSON.stringify({
             name,
             description,
-            properties,
-            variants,
-            image: image ? image!.name : null,
+            properties: processedProperties,
+            variants: processedVariants,
+            image: image ? imageUrlData.publicUrl : null,
             link,
           }),
         }
@@ -79,17 +120,6 @@ const AddProductPopup = ({ storeId, removePopup }: AddProductPopupProps) => {
         throw productData.message
       }
 
-      if (image && productData.image) {
-        const fullImagePath = `${productData.id}_${productData.image}`
-        const { data: imageData, error: imageError } = await supabase.storage
-          .from("/products_images/manual")
-          .upload(fullImagePath, image)
-
-        if (imageError) {
-          console.log(imageError)
-          throw "Image upload failed."
-        }
-      }
       removePopup()
     } catch (error) {
       setErrorMessage(error as string)

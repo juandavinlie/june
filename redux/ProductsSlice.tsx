@@ -3,7 +3,7 @@ import { Store } from "@/models/Store"
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
 interface ProductsState {
-  products: { [id: string]: { [id: string]: Product[] } }
+  products: { [id: string]: { [id: string]: Product } }
 }
 
 const initialState: ProductsState = {
@@ -15,7 +15,7 @@ export const productsSlice = createSlice({
   initialState,
   reducers: {
     addProducts: (state, action) => {
-      state.products[action.payload.storeId] = action.payload.products
+      state.products[action.payload.storeId] = action.payload.productsMap
     },
   },
 })

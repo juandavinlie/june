@@ -14,6 +14,10 @@ import RichChatStripe, {
   MessageWithProducts,
 } from "../components/conversation/RichChatStripe"
 import { ProductDescriptionPair } from "../../models/ProductDescriptionPair"
+import { Product } from "@/models/Product"
+import { ManualProduct } from "@/models/ManualProduct"
+import { objectifyProduct } from "@/utils"
+import LoadingWidget from "../components/common/LoadingWidget"
 
 const configuration = new Configuration({
   apiKey: "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",
@@ -29,7 +33,7 @@ const StoreConversationPage = () => {
   const router = useRouter()
 
   const [store, setStore] = useState<Store | null>(null)
-  const storeProducts = useSelector(
+  const storeProducts: { [id: string]: Product } = useSelector(
     (state: RootState) =>
       state.productsSliceReducer.products[router.query.storeId as string]
   )
@@ -73,12 +77,12 @@ const StoreConversationPage = () => {
     {
       role: "user",
       content:
-        "Remember to always accompany a product name with its product id: <ID>{product_id}</ID>.",
+        "Remember to always accompany a product name with its product id in the format: <ID>{product_id}</ID>.",
     },
     {
       role: "assistant",
       content:
-        "I will always accompany a product name with its product id: <ID>{product_id}</ID>.",
+        "I will always accompany a product name with its product id in the format: <ID>{product_id}</ID>.",
     },
   ]
 
@@ -139,16 +143,14 @@ const StoreConversationPage = () => {
     const integration = storeId.split("_")[0]
     if (response.ok) {
       const data = await response.json()
-      let products = {}
-      if (integration === "shopify") {
-        products = Object.assign(
-          {},
-          ...data.map((product: any) => ({
-            [product.id]: new ShopifyProduct(product),
-          }))
-        )
-      }
-      dispatch(addProducts({ storeId, products }))
+      let productsMap = Object.assign(
+        {},
+        ...data.map((product: any) => ({
+          [product.id]: objectifyProduct(product, integration),
+        }))
+      )
+
+      dispatch(addProducts({ storeId, productsMap }))
     }
   }
 
@@ -233,7 +235,7 @@ const StoreConversationPage = () => {
       )
 
       const description = paragraph.substring(startIdx, openIdTagIdx)
-      let product = null
+      let product: Product | null = null
 
       if (storeProducts && storeProducts[productId]) {
         product = storeProducts[productId]
@@ -316,11 +318,9 @@ const StoreConversationPage = () => {
       if (embeddingsResponse.ok) {
         const data = await embeddingsResponse.json()
         const context = data.context
-        console.log(context)
 
         const latestMessages = getLatestMessages(NEED_TO_SUMMARISE)
-        console.log("Done getting latest messages")
-        console.log(latestMessages)
+
         const contextualisedMessages = [
           ...getSystemMessage(context),
           ...latestMessages,
@@ -332,7 +332,7 @@ const StoreConversationPage = () => {
             },
           ],
         ]
-        console.log(contextualisedMessages)
+
         const chatResponse = await openai.createChatCompletion({
           model,
           messages: contextualisedMessages,
@@ -361,7 +361,7 @@ const StoreConversationPage = () => {
             },
           ],
         ]
-        console.log(messagesWithPromptAndReply)
+
         setMessages(messagesWithPromptAndReply)
         setIsWaitingResponse(false)
       } else {
@@ -400,7 +400,6 @@ const StoreConversationPage = () => {
     if (!router.isReady) return
 
     const storeId = router.query.storeId
-    console.log(storeId)
     getStore(storeId as string)
     getStoreProducts(storeId as string)
   }, [router.isReady])
@@ -409,7 +408,7 @@ const StoreConversationPage = () => {
     smoothScrollToBottom()
   }, [isWaitingResponse])
 
-  return store ? (
+  return store && router.isReady ? (
     <Box width="100%" height="100vh">
       <Box
         display="flex"
@@ -567,7 +566,7 @@ const StoreConversationPage = () => {
       </Box>
     </Box>
   ) : (
-    <Box>Loading</Box>
+    <LoadingWidget color="black" text="Preparing June..." />
   )
 }
 
