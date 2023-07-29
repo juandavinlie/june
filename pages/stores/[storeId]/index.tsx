@@ -331,7 +331,7 @@ const StorePage = () => {
       )}
       {isAddingProduct && (
         <AddProductPopup
-          storeId={storeId as string}
+          store={store}
           removePopup={() => {
             getProducts()
             setIsAddingProduct(false)

@@ -6,9 +6,7 @@ export class Store {
   shopifyAccessToken: string | null
   shopifyDomain: string | null
 
-  constructor(
-    store: any
-  ) {
+  constructor(store: any) {
     this.storeId = store.id
     this.name = store.name
     this.userId = store.user_id

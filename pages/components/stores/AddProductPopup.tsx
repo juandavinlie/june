@@ -1,4 +1,11 @@
-import { Box, Button, Divider, TextField, Typography } from "@mui/material"
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Divider,
+  TextField,
+  Typography,
+} from "@mui/material"
 import Popup from "../common/Popup"
 import CameraAltIcon from "@mui/icons-material/CameraAlt"
 import { createContext, useState } from "react"
@@ -7,6 +14,7 @@ import Dropzone from "react-dropzone"
 import Image from "next/image"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import CircularProgress from "@mui/material/CircularProgress"
+import { Store } from "@/models/Store"
 
 export interface Property {
   name: string | null
@@ -28,7 +36,7 @@ export const VariantsContext = createContext<
 >([[], () => {}])
 
 interface AddProductPopupProps {
-  storeId: string
+  store: Store
   removePopup: () => void
 }
 
@@ -47,7 +55,9 @@ const processVariants = (variants: Variant[]) => {
   )
 }
 
-const AddProductPopup = ({ storeId, removePopup }: AddProductPopupProps) => {
+const AddProductPopup = ({ store, removePopup }: AddProductPopupProps) => {
+  const storeId = store.storeId
+
   const [image, setImage] = useState<File | null>(null)
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
@@ -67,10 +77,7 @@ const AddProductPopup = ({ storeId, removePopup }: AddProductPopupProps) => {
       // Preprocessing
       const processedProperties = processProperties(properties)
       const processedVariants = processVariants(variants)
-      console.log("properties")
-      console.log(processedProperties)
-      console.log("variants")
-      console.log(processedVariants)
+
       // Validation
       if (!name) throw "Name is required"
       else if (!description) throw "Description is required"
@@ -114,7 +121,6 @@ const AddProductPopup = ({ storeId, removePopup }: AddProductPopupProps) => {
       )
 
       const productData = await response.json()
-      console.log(productData)
 
       if (!response.ok) {
         throw productData.message
@@ -182,7 +188,9 @@ const AddProductPopup = ({ storeId, removePopup }: AddProductPopupProps) => {
               <TextField
                 value={name}
                 placeholder="e.g. Slim Fit Chino Pants"
-                inputProps={{ style: { fontSize: 14, padding: 5, width: 300 } }}
+                inputProps={{
+                  style: { fontSize: 14, padding: 10, width: 300 },
+                }}
                 onChange={(e: any) => {
                   setName(e.currentTarget.value)
                 }}
@@ -192,6 +200,7 @@ const AddProductPopup = ({ storeId, removePopup }: AddProductPopupProps) => {
               display="flex"
               justifyContent="space-between"
               alignItems="center"
+              height="30px"
             >
               <Typography variant="title">Description</Typography>
               {description && (
@@ -206,7 +215,7 @@ const AddProductPopup = ({ storeId, removePopup }: AddProductPopupProps) => {
               )}
             </Box>
             <Box
-              height="160px"
+              height="120px"
               sx={{
                 overflowX: "hidden",
                 overflowY: "overlay",

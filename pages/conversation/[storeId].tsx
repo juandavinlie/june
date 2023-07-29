@@ -6,7 +6,6 @@ import SendIcon from "@mui/icons-material/Send"
 import { Configuration, OpenAIApi } from "openai"
 import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "@/redux/config"
-import { ShopifyProduct } from "../../models/ShopifyProduct"
 import { addProducts } from "@/redux/ProductsSlice"
 import LoadingChatStripe from "../components/conversation/LoadingChatStripe"
 import NormalChatStripe from "../components/conversation/NormalChatStripe"
@@ -15,12 +14,11 @@ import RichChatStripe, {
 } from "../components/conversation/RichChatStripe"
 import { ProductDescriptionPair } from "../../models/ProductDescriptionPair"
 import { Product } from "@/models/Product"
-import { ManualProduct } from "@/models/ManualProduct"
 import { objectifyProduct } from "@/utils"
 import LoadingWidget from "../components/common/LoadingWidget"
 
 const configuration = new Configuration({
-  apiKey: "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",
+  apiKey: process.env.NEXT_PUBLIC_OPEN_AI_KEY,
 })
 delete configuration.baseOptions.headers["User-Agent"]
 const openai = new OpenAIApi(configuration)
@@ -49,12 +47,11 @@ const StoreConversationPage = () => {
   ]
 
   const getSystemMessage = (context: string) => {
+    //that sells ${categories.join(", ")}
     return [
       {
         role: "user",
-        content: `You are a store assistant with the main objective of persuading me to buy products from your store that sells ${categories.join(
-          ", "
-        )}. Your store ONLY sells the following products: ${context}. Your response must ONLY be STRICTLY based on these products and NOTHING MORE. When asked about products you don't have information on or do not sell, simply say "I don't have the relevant information". Don't justify your answers. Talk to me like a human. Respond in markdown format. 
+        content: `You are a store assistant with the main objective of persuading me to buy products from your store. Your store ONLY sells the following products: ${context}. Your response must ONLY be STRICTLY based on these products and NOTHING MORE. When asked about products you don't have information on or do not sell, simply say "I don't have the relevant information". Don't justify your answers. Talk to me like a human. Respond in markdown format. 
               
       When talking about multiple products, you always end a product's description with its product id, use the following format:
 

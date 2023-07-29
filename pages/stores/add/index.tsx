@@ -5,12 +5,13 @@ import { useContext } from "react"
 import { ScreenContext } from "../../_app"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import { useRouter } from "next/router"
+import { openInNewTab } from "@/utils"
 
 const AddStorePage = () => {
   const router = useRouter()
   const isMobileScreen = useContext(ScreenContext)
   const integrations = [
-    ["Link with Shopify", shopifyLogo, ""],
+    ["Link with Shopify", shopifyLogo, "https://apps.shopify.com/june-ai"],
     ["Manual Entry", manualLogo, "/stores/add/manual"],
   ]
   return (
@@ -46,7 +47,11 @@ const AddStorePage = () => {
               boxShadow="2"
               gap="5px"
               onClick={() => {
-                router.push(integration[2])
+                if (idx === 0) {
+                  openInNewTab(integration[2])
+                } else {
+                  router.push(integration[2])
+                }
               }}
               sx={{ "&:hover": { cursor: "pointer", bgcolor: "#D3D3D3" } }}
               key={idx}
