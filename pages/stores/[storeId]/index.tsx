@@ -309,7 +309,7 @@ const StorePage = () => {
       )}
       {isLoadingProducts ? (
         <LoadingWidget color="black" text="Loading store products..." />
-      ) : products.length > 0 ? (
+      ) : products && products.length > 0 ? (
         products.map((product: Product, idx: number) => {
           return <ProductCard product={product} key={product.productId} />
         })
