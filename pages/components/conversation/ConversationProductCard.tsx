@@ -24,7 +24,6 @@ const ConversationProductCard = ({ product }: ConversationProductCardProps) => {
       {product.image !== null && (
         <img
           width={isMobileScreen ? "100%" : "20%"}
-          height="auto"
           src={product.image}
           style={{ objectFit: "contain" }}
         />
@@ -40,7 +39,8 @@ const ConversationProductCard = ({ product }: ConversationProductCardProps) => {
           display="flex"
           flexDirection="column"
           gap="5px"
-          height="45%"
+          height="auto"
+          maxHeight="300px"
           sx={{
             overflowX: "hidden",
           }}
