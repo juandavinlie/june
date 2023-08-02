@@ -7,23 +7,18 @@ interface BorderedBoxProps {
 
 const BorderedBox = ({ children }: BorderedBoxProps) => {
   return (
-    <Box display="flex" flexDirection="column" width="100%" height="100vh">
-      <Box display="flex" p="20px">
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="flex-start"
-          width="70%"
-          maxWidth="500px"
-          gap="30px"
-          boxShadow="2"
-          borderRadius="15px"
-          p="20px"
-          bgcolor="white"
-        >
-          {children}
-        </Box>
-      </Box>
+    <Box
+      display="flex"
+      flexDirection="column"
+      justifyContent="flex-start"
+      width="100%"
+      gap="30px"
+      boxShadow="2"
+      borderRadius="15px"
+      p="20px"
+      bgcolor="white"
+    >
+      {children}
     </Box>
   )
 }

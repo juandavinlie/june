@@ -13,8 +13,7 @@ const StoreCard = ({ store }: StoreCardProps) => {
     <Link href={`/stores/${store.storeId}`}>
       <Box
         minHeight="90px"
-        width="20%"
-        minWidth="200px"
+        width="200px"
         p="10px"
         borderRadius="5px"
         border="1px solid #D3D3D3"

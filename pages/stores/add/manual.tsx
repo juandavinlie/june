@@ -1,14 +1,16 @@
 import BorderedBox from "@/pages/components/common/BorderedBox"
+import { HeaderContext } from "@/pages/components/common/HeaderLayout"
 import { Box, Button, Divider, TextField, Typography } from "@mui/material"
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/router"
-import { useState } from "react"
+import { useContext, useEffect, useState } from "react"
 
 const ManualEntryPage = () => {
   const [storeName, setStoreName] = useState("")
   const [category, setCategory] = useState("")
 
   const [isCreatingStore, setIsCreatingStore] = useState(false)
+  const setHeaderTitle = useContext(HeaderContext)
 
   const router = useRouter()
   const supabase = useSupabaseClient()
@@ -46,16 +48,22 @@ const ManualEntryPage = () => {
       setIsCreatingStore(false)
     }
   }
+
+  useEffect(() => {
+    setHeaderTitle([{ text: "Stores", link: "/stores" }, { text: "Add", link: "/stores/add" }, { text: "Manual", link: "/stores/add/manual" }])
+  }, [])
+
   return (
-    <Box>
+    <Box display="flex" p="20px">
       <BorderedBox>
         <Box>
-          <Typography variant="h5">Store details</Typography>
+          <Typography variant="h5">Store Details</Typography>
           <Divider />
         </Box>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">Store name</Typography>
           <TextField
+            sx={{ width: "50%" }}
             placeholder="e.g. Lavista"
             value={storeName}
             onChange={(e) => {
@@ -66,6 +74,7 @@ const ManualEntryPage = () => {
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">Category</Typography>
           <TextField
+            sx={{ width: "50%" }}
             placeholder="e.g. Clothing"
             value={category}
             onChange={(e) => {

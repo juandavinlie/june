@@ -9,9 +9,10 @@ import { RootState } from "@/redux/config"
 import { useRouter } from "next/router"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { HeaderContext } from "../components/common/HeaderLayout"
+import { ScreenContext } from "../_app"
 
 const Stores = () => {
-  const [isAddingStore, setIsAddingStore] = useState(false)
+  const isMobileScreen = useContext(ScreenContext)
   const [isCreatingNewStore, setIsCreatingNewStore] = useState(false)
 
   const stores: { [id: string]: Store } = useSelector(
@@ -115,7 +116,7 @@ const Stores = () => {
   }, [])
 
   return router.isReady ? (
-    <Box display="flex" gap="10px" p="20px">
+    <Box display="flex" flexWrap="wrap" p="20px" gap="20px">
       {stores &&
         Object.values(stores).map((store: Store) => (
           <StoreCard store={store} key={store.storeId} />
@@ -125,8 +126,7 @@ const Stores = () => {
         alignItems="center"
         justifyContent="center"
         minHeight="90px"
-        width="20%"
-        minWidth="200px"
+        width="200px"
         p="10px"
         borderRadius="5px"
         border="1px solid #D3D3D3"

@@ -1,11 +1,12 @@
 import { Box, Typography } from "@mui/material"
 import shopifyLogo from "../../../public/shopify.png"
 import manualLogo from "../../../public/pencil.png"
-import { useContext } from "react"
+import { useContext, useEffect } from "react"
 import { ScreenContext } from "../../_app"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import { useRouter } from "next/router"
 import { openInNewTab } from "@/utils"
+import { HeaderContext } from "@/pages/components/common/HeaderLayout"
 
 const AddStorePage = () => {
   const router = useRouter()
@@ -14,22 +15,15 @@ const AddStorePage = () => {
     ["Link with Shopify", shopifyLogo, "https://apps.shopify.com/june-ai"],
     ["Manual Entry", manualLogo, "/stores/add/manual"],
   ]
+
+  const setHeaderTitle = useContext(HeaderContext)
+
+  useEffect(() => {
+    setHeaderTitle([{ text: "Stores", link: "/stores" }, { text: "Add", link: "/stores/add" }])
+  }, [])
+
   return (
     <Box display="flex" flexDirection="column" gap="20px" p="20px">
-      <Box
-        display="flex"
-        gap="5px"
-        onClick={() => {
-          router.push("/stores")
-        }}
-        sx={{ "&:hover": { cursor: "pointer" } }}
-      >
-        <ArrowBackIcon />
-        <Typography>Back</Typography>
-      </Box>
-      <Typography variant="h5" textAlign="center">
-        Select an Integration Method
-      </Typography>
       <Box
         display="grid"
         rowGap="1rem"
@@ -45,6 +39,7 @@ const AddStorePage = () => {
               width="150px"
               height="150px"
               boxShadow="2"
+              borderRadius="5px"
               gap="5px"
               onClick={() => {
                 if (idx === 0) {

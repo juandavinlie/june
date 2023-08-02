@@ -54,7 +54,12 @@ const HeaderLayout = ({ children }: HeaderLayoutProps) => {
           )}
           <Box display="flex">
             {headerTitle.map((title: Title, idx: number) => (
-              <Box display="flex" p={idx !== 0 ? "0 10px" : "0"} gap="10px" key={idx}>
+              <Box
+                display="flex"
+                paddingLeft={idx !== 0 ? "10px" : "0"}
+                gap="10px"
+                key={idx}
+              >
                 <Box
                   onClick={() => {
                     router.push(title.link)

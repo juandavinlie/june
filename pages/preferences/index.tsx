@@ -10,24 +10,24 @@ const PreferencesPage = () => {
   const user = useUser()
 
   useEffect(() => {
-    setHeaderTitle([
-      { text: "Preferences", link: "/preferences" },
-    ])
+    setHeaderTitle([{ text: "Preferences", link: "/preferences" }])
   }, [])
 
   return user ? (
-    <BorderedBox>
-      <Box display="flex" flexDirection="column" gap="5px">
-        <Typography variant="h5">Account Information</Typography>
-        <Divider />
-        <Box display="flex">
-          <Box width="250px">
-            <Typography variant="h6">Email</Typography>
+    <Box display="flex" p="20px">
+      <BorderedBox>
+        <Box display="flex" flexDirection="column" gap="5px">
+          <Typography variant="h5">Account Information</Typography>
+          <Divider />
+          <Box display="flex">
+            <Box width="250px">
+              <Typography variant="h6">Email</Typography>
+            </Box>
+            <Typography variant="h6">{user!.email}</Typography>
           </Box>
-          <Typography variant="h6">{user!.email}</Typography>
         </Box>
-      </Box>
-    </BorderedBox>
+      </BorderedBox>
+    </Box>
   ) : (
     "Loading"
   )

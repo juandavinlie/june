@@ -57,6 +57,8 @@ const SideBar = () => {
     { menuTitle: "Preferences", menuLink: "/preferences" },
   ]
 
+  const [showSideBar, setShowSideBar] = useContext(SideBarContext)
+
   return (
     <Box
       width="256px"
@@ -69,7 +71,13 @@ const SideBar = () => {
       zIndex="2"
     >
       <Box display="flex" flexDirection="column" p="20px" gap="15px">
-        <Link href={"/"} key={"/"}>
+        <Link
+          href={"/"}
+          onClick={() => {
+            setShowSideBar(false)
+          }}
+          key={"/"}
+        >
           <Typography
             variant="h3"
             sx={{ "&:hover": { cursor: "pointer", color: "black" } }}
