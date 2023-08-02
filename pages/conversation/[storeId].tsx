@@ -239,10 +239,7 @@ const StoreConversationPage = () => {
       }
 
       productDescriptionPairs.push(
-        new ProductDescriptionPair(
-          description.replace("\n", "<br/><br/>"),
-          product
-        )
+        new ProductDescriptionPair(description.replace(/\n/g, "<br/>"), product)
       )
 
       startIdx = closeIdTagIdx + 5
@@ -257,7 +254,7 @@ const StoreConversationPage = () => {
     if (remainingText.length > 0) {
       productDescriptionPairs.push(
         new ProductDescriptionPair(
-          remainingText.replace("\n", "<br/><br/>"),
+          remainingText.replace(/\n/g, "<br/>"),
           null
         )
       )
@@ -342,7 +339,7 @@ const StoreConversationPage = () => {
           temperature: 0,
         })
         const reply = chatResponse.data.choices[0].message
-        
+
         if (!reply) {
           throw "No reply received from June"
         }
