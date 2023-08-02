@@ -144,7 +144,6 @@ const AddProductPopup = ({ store, removePopup }: AddProductPopupProps) => {
           <Dropzone
             multiple={false}
             onDrop={(acceptedFiles: File[]) => {
-              console.log(acceptedFiles[0])
               setImage(acceptedFiles[0])
             }}
           >

@@ -46,7 +46,11 @@ const RichChatStripe = ({ messageWithProducts }: RichChatStripeProps) => {
                   gap="20px"
                   key={idx}
                 >
-                  <Typography>{productDescriptionPair.description}</Typography>
+                  <Typography
+                    dangerouslySetInnerHTML={{
+                      __html: productDescriptionPair.description,
+                    }}
+                  />
                   {product && (
                     <ConversationProductCard
                       product={product}

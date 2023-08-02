@@ -11,7 +11,6 @@ interface ConversationProductCardProps {
 const ConversationProductCard = ({ product }: ConversationProductCardProps) => {
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0)
   const isMobileScreen = useContext(ScreenContext)
-  console.log(product)
   return (
     <Box
       display="flex"
@@ -31,9 +30,13 @@ const ConversationProductCard = ({ product }: ConversationProductCardProps) => {
       <Box display="flex" width="100%" flexDirection="column" gap="10px">
         <Typography variant="h6">{`(id: ${product.productId})`}</Typography>
         <Typography variant="h4">{product.name}</Typography>
-        <Typography>
-          {product.description ? product.description : "No Description"}
-        </Typography>
+        <Typography
+          dangerouslySetInnerHTML={{
+            __html: product.description
+              ? product.description
+              : "No Description",
+          }}
+        />
         <Divider />
         <Box
           display="flex"

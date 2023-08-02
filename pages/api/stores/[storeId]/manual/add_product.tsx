@@ -8,8 +8,7 @@ export default async function handler(
   if (req.method === "POST") {
     const { storeId } = req.query
     const { name, description, properties, variants, image, link } = req.body
-    console.log(properties)
-    console.log(variants)
+    
     const supabaseServerClient = createServerSupabaseClient({ req, res })
     const { data, error } = await supabaseServerClient
       .from("manual_product")

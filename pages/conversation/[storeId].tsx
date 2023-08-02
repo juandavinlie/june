@@ -51,7 +51,7 @@ const StoreConversationPage = () => {
     return [
       {
         role: "user",
-        content: `You are a store assistant with the main objective of persuading me to buy products from your store. Your store ONLY sells the following products: ${context}. Your response must ONLY be STRICTLY based on these products and NOTHING MORE. When asked about products you don't have information on or do not sell, simply say "I don't have the relevant information". Don't justify your answers. Talk to me like a human. Respond in markdown format. 
+        content: `You are a store assistant with the main objective of persuading me to buy products from your store. Your store ONLY sells the following products: ${context}. Your response must ONLY be STRICTLY based on these products and NOTHING MORE. When asked about products you don't have information on or do not sell, simply say "I don't have the relevant information". Don't justify your answers. Talk to me like a human.
               
       When talking about multiple products, you always end a product's description with its product id, use the following format:
 
@@ -88,7 +88,7 @@ const StoreConversationPage = () => {
       role: "user",
       content: `You are a store assistant with the main objective of persuading me to buy products from your store which sells ${categories.join(
         ", "
-      )}. Don't justify your answers. Jump straight to the answers. Talk to me like a human. Respond in markdown format. 
+      )}. Don't justify your answers. Jump straight to the answers. Talk to me like a human.
               
       When talking about multiple products, always end a product's description with its product id, use the following format:
 
@@ -107,7 +107,7 @@ const StoreConversationPage = () => {
     {
       role: "assistant",
       content:
-        "Sure! I will jump straight to the answer. I will always provide the product id in the format <ID>{id}</ID> I will talk like a human. I will respond in markdown format.",
+        "Sure! I will jump straight to the answer. I will always provide the product id in the format <ID>{id}</ID> I will talk like a human.",
     },
   ]
 
@@ -239,7 +239,10 @@ const StoreConversationPage = () => {
       }
 
       productDescriptionPairs.push(
-        new ProductDescriptionPair(description, product)
+        new ProductDescriptionPair(
+          description.replace("\n", "<br/><br/>"),
+          product
+        )
       )
 
       startIdx = closeIdTagIdx + 5
@@ -253,7 +256,10 @@ const StoreConversationPage = () => {
 
     if (remainingText.length > 0) {
       productDescriptionPairs.push(
-        new ProductDescriptionPair(remainingText, null)
+        new ProductDescriptionPair(
+          remainingText.replace("\n", "<br/><br/>"),
+          null
+        )
       )
     }
 
@@ -336,7 +342,7 @@ const StoreConversationPage = () => {
           temperature: 0,
         })
         const reply = chatResponse.data.choices[0].message
-        console.log(reply)
+        
         if (!reply) {
           throw "No reply received from June"
         }
