@@ -229,6 +229,47 @@ const AddProductTabs = () => {
   const [properties, setProperties] = useContext(PropertiesContext)
   const [variants, setVariants] = useContext(VariantsContext)
 
+  const populateVariants = (
+    curIdx: number,
+    variantTitle: string,
+    allVariants: Variant[]
+  ) => {
+    if (curIdx === properties.length) {
+      allVariants.push({
+        title: variantTitle,
+        inventory_quantity: null,
+        price: null,
+      })
+    } else {
+      const curProperty: Property = properties[curIdx]
+
+      if (!curProperty.name || !curProperty.values) {
+        return
+      }
+
+      const curPropertyName: string = curProperty.name
+      const curPropertyValues: string[] = curProperty.values.split(",")
+
+      for (let i = 0; i < curPropertyValues.length; i++) {
+        const value = curPropertyValues[i]
+        populateVariants(
+          curIdx + 1,
+          variantTitle +
+            `${curIdx !== 0 ? ", " : ""}${curPropertyName}: ${value}`,
+          allVariants
+        )
+      }
+    }
+  }
+
+  const generateVariants = () => {
+    if (properties.length > 0) {
+      let allVariants: Variant[] = []
+      populateVariants(0, "", allVariants)
+      setVariants(allVariants)
+    }
+  }
+
   return (
     <Box
       display="flex"
@@ -252,24 +293,31 @@ const AddProductTabs = () => {
           <StyledTab label="Properties" />
           <StyledTab label="Variants" />
         </Tabs>
-        <Button
-          onClick={() => {
-            if (selectedIndex === 0) {
-              setProperties(properties.concat({ name: null, values: null }))
-            } else if (selectedIndex === 1) {
-              setVariants(
-                variants.concat({
-                  title: null,
-                  inventory_quantity: null,
-                  price: null,
-                })
-              )
-            }
-          }}
-          variant="outlined"
-        >
-          <AddIcon />
-        </Button>
+        <Box display="flex" gap="5px">
+          {selectedIndex === 1 && (
+            <Button onClick={generateVariants} variant="outlined">
+              <Typography>Auto Generate</Typography>
+            </Button>
+          )}
+          <Button
+            onClick={() => {
+              if (selectedIndex === 0) {
+                setProperties(properties.concat({ name: null, values: null }))
+              } else if (selectedIndex === 1) {
+                setVariants(
+                  variants.concat({
+                    title: null,
+                    inventory_quantity: null,
+                    price: null,
+                  })
+                )
+              }
+            }}
+            variant="outlined"
+          >
+            <AddIcon />
+          </Button>
+        </Box>
       </Box>
       <Box height="auto" width="100%">
         {bodies[selectedIndex]}
