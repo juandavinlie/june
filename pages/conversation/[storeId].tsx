@@ -16,6 +16,7 @@ import { ProductDescriptionPair } from "../../models/ProductDescriptionPair"
 import { Product } from "@/models/Product"
 import { objectifyProduct } from "@/utils"
 import LoadingWidget from "../components/common/LoadingWidget"
+import Link from "next/link"
 
 const configuration = new Configuration({
   apiKey: process.env.NEXT_PUBLIC_OPEN_AI_KEY,
@@ -253,10 +254,7 @@ const StoreConversationPage = () => {
 
     if (remainingText.length > 0) {
       productDescriptionPairs.push(
-        new ProductDescriptionPair(
-          remainingText.replace(/\n/g, "<br/>"),
-          null
-        )
+        new ProductDescriptionPair(remainingText.replace(/\n/g, "<br/>"), null)
       )
     }
 
@@ -422,7 +420,12 @@ const StoreConversationPage = () => {
         p="0 20px"
       >
         <Typography>{store!.name}</Typography>
-        <Typography>Powered by June</Typography>
+        <Typography>
+          Powered by{" "}
+          <Link href="https://usejune.com" target="_blank" rel="noopener noreferrer">
+            June
+          </Link>
+        </Typography>
       </Box>
       <Box
         width="100%"
