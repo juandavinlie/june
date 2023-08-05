@@ -244,9 +244,10 @@ const AddProductPopup = ({ store, removePopup }: AddProductPopupProps) => {
         <Box display="flex" flexDirection="column" gap="5px">
           <Typography variant="title">Link (Optional)</Typography>
           <TextField
+            fullWidth
             value={link}
             placeholder="e.g. www.example.com/chino_pants"
-            inputProps={{ style: { fontSize: 14, padding: 5, width: 300 } }}
+            inputProps={{ style: { fontSize: 14, padding: 5 } }}
             onChange={(e: any) => {
               setLink(e.currentTarget.value)
             }}
