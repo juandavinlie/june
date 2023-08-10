@@ -1,10 +1,11 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { ThemeSupa } from "@supabase/auth-ui-shared"
 import { Auth } from "@supabase/auth-ui-react"
-import { Box, Button, Divider, Typography } from "@mui/material"
+import { Box, Button, Divider, TextField, Typography } from "@mui/material"
 import GoogleIcon from "@mui/icons-material/Google"
 import { useRouter } from "next/router"
 import { useEffect } from "react"
+import JuneTextLogo from "./components/common/JuneTextLogo"
 
 const Login = () => {
   const supabase = useSupabaseClient()
@@ -31,7 +32,7 @@ const Login = () => {
   return router.isReady ? (
     <Box display="flex" flexDirection="column" width="100%" height="100vh">
       <Box display="flex" p="30px">
-        <Typography variant="h3">June</Typography>
+        <JuneTextLogo />
       </Box>
       <Box display="flex" justifyContent="center" flexGrow="1" p="50px 0">
         <Box

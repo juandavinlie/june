@@ -7,6 +7,8 @@ import { useRouter } from "next/router"
 import { useContext } from "react"
 import { SideBarContext } from "./SideBarLayout"
 
+import JuneTextLogo from "./JuneTextLogo"
+
 interface MenuButton {
   menuTitle: string
   menuLink: string
@@ -78,12 +80,7 @@ const SideBar = () => {
           }}
           key={"/"}
         >
-          <Typography
-            variant="h3"
-            sx={{ "&:hover": { cursor: "pointer", color: "black" } }}
-          >
-            June
-          </Typography>
+          <JuneTextLogo />
         </Link>
       </Box>
       <GrayDivider />
