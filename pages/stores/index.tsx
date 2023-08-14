@@ -1,5 +1,5 @@
 import { setStores } from "@/redux/UserStoresSlice"
-import { Button } from "@mui/base"
+import { Button } from "@mui/material"
 import { Box, Typography } from "@mui/material"
 import { useContext, useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -10,6 +10,7 @@ import { useRouter } from "next/router"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { HeaderContext } from "../components/common/HeaderLayout"
 import { ScreenContext } from "../_app"
+import LoadingWidget from "../components/common/LoadingWidget"
 
 const Stores = () => {
   const isMobileScreen = useContext(ScreenContext)
@@ -116,45 +117,39 @@ const Stores = () => {
   }, [])
 
   return router.isReady ? (
-    <Box display="flex" flexWrap="wrap" p="20px" gap="20px">
-      {stores &&
-        Object.values(stores).map((store: Store) => (
-          <StoreCard store={store} key={store.storeId} />
-        ))}
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        minHeight="90px"
-        width="200px"
-        p="10px"
-        borderRadius="5px"
-        border="1px solid #D3D3D3"
-        boxShadow="1"
+    <Box display="flex" flexDirection="column" p="20px" gap="10px">
+      <Button
+        variant="outlined"
         onClick={() => {
           router.push("/stores/add")
         }}
-        sx={{ "&:hover": { cursor: "pointer", bgcolor: "#D3D3D3" } }}
+        sx={{ textTransform: "none", width: "100px", padding: "8px" }}
       >
-        <Typography>Add Store</Typography>
+        <Typography variant="h5">Add store</Typography>
+      </Button>
+      <Box display="flex" flexWrap="wrap" gap="20px">
+        {stores &&
+          Object.values(stores).map((store: Store) => (
+            <StoreCard store={store} key={store.storeId} />
+          ))}
+        {isCreatingNewStore && (
+          <Box
+            position="fixed"
+            bottom="50px"
+            right="50px"
+            boxShadow="2"
+            borderRadius="5px"
+            bgcolor="#2b825b"
+            color="white"
+            p="8px"
+          >
+            <Typography variant="h6">Creating new store...</Typography>
+          </Box>
+        )}
       </Box>
-      {isCreatingNewStore && (
-        <Box
-          position="fixed"
-          bottom="50px"
-          right="50px"
-          boxShadow="2"
-          borderRadius="5px"
-          bgcolor="#2b825b"
-          color="white"
-          p="8px"
-        >
-          <Typography variant="h6">Creating new store...</Typography>
-        </Box>
-      )}
     </Box>
   ) : (
-    "Loading"
+    <LoadingWidget color="black" text="Loading stores page..." />
   )
 }
 

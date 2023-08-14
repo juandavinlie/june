@@ -1,23 +1,34 @@
-import { Box, Button, Divider, Typography } from "@mui/material"
+import { Box, Button, Typography } from "@mui/material"
 import { useRouter } from "next/router"
-import { useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "@/redux/config"
-import { ShopifyProduct } from "@/models/ShopifyProduct"
-import { addProductList } from "@/redux/UserStoresProductsSlice"
-import { Product } from "@/models/Product"
-import ProductCard from "@/pages/components/stores/shopify/ProductCard"
 
 import shopifyLogo from "../../../public/shopify.png"
-import emptyLogo from "../../../public/box.png"
 import IntegrationLogo from "@/pages/components/common/IntegrationLogo"
 import { Store } from "@/models/Store"
 import { addStore } from "@/redux/UserStoresSlice"
-import AddProductPopup from "@/pages/components/stores/AddProductPopup"
-import { ManualProduct } from "@/models/ManualProduct"
+import { HeaderContext } from "@/pages/components/common/HeaderLayout"
+import StoreTabs from "@/pages/components/stores/StoreTabs"
+import {
+  StoreProductsHook,
+  useStoreProducts,
+} from "@/pages/hooks/stores/useStoreProducts"
+import {
+  EmbeddingsHook,
+  useEmbeddings,
+} from "@/pages/hooks/stores/useEmbeddings"
+import { SyncingHook, useSyncing } from "@/pages/hooks/stores/useSyncing"
 import LoadingWidget from "@/pages/components/common/LoadingWidget"
-import { Title, HeaderContext } from "@/pages/components/common/HeaderLayout"
-import { openInNewTab } from "@/utils"
+
+export const StoreContext = createContext<Store>(new Store({}))
+export const StoreProductsContext = createContext<StoreProductsHook>(
+  {} as StoreProductsHook
+)
+export const EmbeddingsContext = createContext<EmbeddingsHook>(
+  {} as EmbeddingsHook
+)
+export const SyncingContext = createContext<SyncingHook>({} as SyncingHook)
 
 const StorePage = () => {
   const router = useRouter()
@@ -28,17 +39,6 @@ const StorePage = () => {
   const store = useSelector(
     (state: RootState) => state.userStoresSliceReducer.stores[storeId as string]
   )
-
-  const products = useSelector(
-    (state: RootState) =>
-      state.userStoresProductsSliceReducer.productLists &&
-      state.userStoresProductsSliceReducer.productLists[storeId as string]
-  )
-
-  const newProducts = []
-
-  // LOADING STATUSES
-  const [isLoadingProducts, setIsLoadingProducts] = useState(false)
 
   // GETTERS
   const getStore = async (storeId: string) => {
@@ -52,129 +52,34 @@ const StorePage = () => {
     }
   }
 
-  const getProducts = async () => {
-    try {
-      setIsLoadingProducts(true)
-      const response = await fetch(
-        `/api/stores/${storeId as string}/products`,
-        {
-          method: "GET",
-        }
-      )
-      if (response.ok) {
-        const data = await response.json()
-        let formattedProducts: Product[] = []
-        if (store.integration === "shopify") {
-          formattedProducts = data.map(
-            (product: any) => new ShopifyProduct(product)
-          )
-        } else if (store.integration === "manual") {
-          formattedProducts = data.map(
-            (product: any) => new ManualProduct(product)
-          )
-        }
-        dispatch(
-          addProductList({
-            storeId: storeId,
-            productList: formattedProducts,
-          })
-        )
-      }
-    } catch (error) {
-      // TODO: throw error here
-    } finally {
-      setIsLoadingProducts(false)
-    }
-  }
-
-  // EMBEDDINGS STATUSES
-  const [hasEmbeddings, setHasEmbeddings] = useState<boolean | null>(null)
-  const [embeddingsTimestamp, setEmbeddingsTimestamp] = useState<string | null>(
-    null
+  // PRODUCTS
+  const storeProductsHookObj: StoreProductsHook = useStoreProducts(
+    storeId as string
   )
-  const [isEmbedding, setIsEmbedding] = useState<boolean | null>(null)
+  const { getProducts } = storeProductsHookObj
 
-  const getEmbeddingStatuses = async () => {
-    const response = await fetch(
-      `/api/stores/${storeId as string}/embeddings`,
-      {
-        method: "GET",
-      }
-    )
-    if (response.ok) {
-      const data = await response.json()
-      setHasEmbeddings(data.has_embeddings)
-      setEmbeddingsTimestamp(data.last_embeddings_timestamp)
-      setIsEmbedding(data.is_embedding)
-    }
-  }
+  // EMBEDDINGS
+  const embeddingsHookObj: EmbeddingsHook = useEmbeddings(storeId as string)
+  const {
+    hasEmbeddings,
+    embeddingsTimestamp,
+    isEmbedding,
+    getEmbeddingStatuses,
+    embedStoreData,
+  } = embeddingsHookObj
 
-  // SYNCING STATUSES FOR SHOPIFY
-  const [isSyncing, setIsSyncing] = useState<boolean | null>(null)
-  const [syncTimestamp, setSyncTimestamp] = useState<string | null>(null)
-
-  const getShopifySyncingStatuses = async () => {
-    const response = await fetch(
-      `/api/stores/${storeId as string}/shopify/syncing`,
-      {
-        method: "GET",
-      }
-    )
-    if (response.ok) {
-      const data = await response.json()
-      setIsSyncing(data.is_syncing)
-      setSyncTimestamp(data.last_sync_timestamp)
-    }
-  }
-
-  // ADDING PRODUCTS
-  const [isAddingProduct, setIsAddingProduct] = useState(false)
-
-  // COPYING JUNE LINK
-  const [conversationPageLink, setConversationPageLink] = useState("")
-  const [linkIsJustCopied, setLinkIsJustCopied] = useState(false)
-
-  // ACTIONS
-  const showCopiedLabel = () => {
-    setLinkIsJustCopied(true)
-    setTimeout(() => {
-      setLinkIsJustCopied(false)
-    }, 3000)
-  }
-
-  const copyConversationPageLink = () => {
-    if (conversationPageLink) {
-      navigator.clipboard.writeText(conversationPageLink).then(showCopiedLabel)
-    }
-  }
-
-  const syncShopifyStoreData = async () => {
-    setIsSyncing(true)
-    console.log("Syncing Store Data")
-    const response = await fetch(`/api/stores/${storeId}/shopify/sync`, {
-      method: "POST",
-    })
-    if (response.ok) {
-    }
-  }
-
-  const embedStoreData = async () => {
-    setIsEmbedding(true)
-    console.log("Embedding Store Data")
-    const response = await fetch(`/api/stores/${storeId}/embed`, {
-      method: "POST",
-    })
-    if (response.ok) {
-    }
-  }
+  // SYNCING
+  const syncingHookObj: SyncingHook = useSyncing(storeId as string)
+  const {
+    isSyncing,
+    syncTimestamp,
+    getShopifySyncingStatuses,
+    syncShopifyStoreData,
+  } = syncingHookObj
 
   // INITIALISATIONS
   useEffect(() => {
     if (!router.isReady) return
-
-    setConversationPageLink(
-      `${process.env.NEXT_PUBLIC_SHOPIFY_HOST_SCHEME}://${process.env.NEXT_PUBLIC_SHOPIFY_HOST_NAME}/conversation/${storeId}`
-    )
 
     if (!store) {
       getStore(storeId as string)
@@ -232,129 +137,19 @@ const StorePage = () => {
             logoSrc={shopifyLogo.src}
           />
         </Box>
-        <Box display="flex" gap="5px">
-          <Button
-            variant="outlined"
-            onClick={copyConversationPageLink}
-            sx={{ textTransform: "none" }}
-          >
-            Copy June Link
-          </Button>
-          {store.integration !== "manual" && (
-            <Button
-              variant="outlined"
-              onClick={() => {
-                syncShopifyStoreData()
-              }}
-              sx={{ textTransform: "none" }}
-            >
-              Sync
-            </Button>
-          )}
-          <Button
-            variant="outlined"
-            onClick={() => {
-              embedStoreData()
-            }}
-            sx={{ textTransform: "none" }}
-          >
-            Embed
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => {
-              openInNewTab(`/conversation/${storeId}`)
-            }}
-            sx={{ textTransform: "none" }}
-          >
-            Test
-          </Button>
-        </Box>
       </Box>
-      {store.integration !== "manual" && (
-        <Typography variant="h5">
-          Store Data:{" "}
-          {isSyncing === null
-            ? "Loading..."
-            : isSyncing
-            ? "In Progress..."
-            : syncTimestamp
-            ? `Synced on ${new Date(syncTimestamp)}`
-            : "No yet synced"}
-        </Typography>
-      )}
-      <Typography variant="h5">
-        Embeddings:{" "}
-        {hasEmbeddings === null || isEmbedding === null
-          ? "Loading..."
-          : isEmbedding
-          ? "In Progress..."
-          : hasEmbeddings && embeddingsTimestamp
-          ? `Updated on ${new Date(embeddingsTimestamp)}`
-          : "No embeddings yet"}
-      </Typography>
-      <Divider />
-      <Typography>Products</Typography>
-      {store.integration === "manual" && (
-        <Box display="flex">
-          <Button
-            variant="outlined"
-            onClick={() => {
-              setIsAddingProduct(true)
-            }}
-          >
-            Add product
-          </Button>
-        </Box>
-      )}
-      {isLoadingProducts ? (
-        <LoadingWidget color="black" text="Loading store products..." />
-      ) : products && products.length > 0 ? (
-        products.map((product: Product, idx: number) => {
-          return <ProductCard product={product} key={product.productId} />
-        })
-      ) : (
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-          width="100%"
-          height="150px"
-          border="0.5px solid gray"
-          borderRadius="10px"
-          gap="5px"
-        >
-          <img height="50%" src={emptyLogo.src} />
-          No products added yet.
-        </Box>
-      )}
-      {isAddingProduct && (
-        <AddProductPopup
-          store={store}
-          removePopup={() => {
-            getProducts()
-            setIsAddingProduct(false)
-          }}
-        />
-      )}
-      {linkIsJustCopied && (
-        <Box
-          position="fixed"
-          bottom="50px"
-          right="50px"
-          boxShadow="2"
-          borderRadius="5px"
-          bgcolor="#2b825b"
-          color="white"
-          p="8px"
-        >
-          <Typography variant="h5">June Link Copied to Clipboard</Typography>
-        </Box>
-      )}
+      <StoreContext.Provider value={store}>
+        <StoreProductsContext.Provider value={storeProductsHookObj}>
+          <EmbeddingsContext.Provider value={embeddingsHookObj}>
+            <SyncingContext.Provider value={syncingHookObj}>
+              <StoreTabs />
+            </SyncingContext.Provider>
+          </EmbeddingsContext.Provider>
+        </StoreProductsContext.Provider>
+      </StoreContext.Provider>
     </Box>
   ) : (
-    <Box>Loading</Box>
+    <LoadingWidget color="black" text="Loading stores..." />
   )
 }
 

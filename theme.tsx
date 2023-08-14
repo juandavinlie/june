@@ -4,11 +4,13 @@ import { createTheme } from "@mui/material"
 declare module "@mui/material/styles" {
   interface TypographyVariants {
     title: React.CSSProperties
+    tabtitle: React.CSSProperties
   }
 
   // allow configuration using `createTheme`
   interface TypographyVariantsOptions {
     title?: React.CSSProperties
+    tabtitle?: React.CSSProperties
   }
 }
 
@@ -16,6 +18,7 @@ declare module "@mui/material/styles" {
 declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
     title: true
+    tabtitle: true
   }
 }
 
@@ -55,6 +58,11 @@ export const themeSettings = createTheme({
       fontFamily: ["Inter", "sans-serif"].join(","),
       fontWeight: "500",
       fontSize: 14,
+    },
+    tabtitle: {
+      fontFamily: ["Inter", "sans-serif"].join(","),
+      fontWeight: "500",
+      fontSize: 18,
     },
   },
   palette: {

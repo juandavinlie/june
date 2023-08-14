@@ -6,6 +6,7 @@ import GoogleIcon from "@mui/icons-material/Google"
 import { useRouter } from "next/router"
 import { useEffect } from "react"
 import JuneTextLogo from "./components/common/JuneTextLogo"
+import LoadingWidget from "./components/common/LoadingWidget"
 
 const Login = () => {
   const supabase = useSupabaseClient()
@@ -68,7 +69,7 @@ const Login = () => {
       </Box>
     </Box>
   ) : (
-    "Loading"
+    <LoadingWidget color="black" text="Loading..." />
   )
 }
 

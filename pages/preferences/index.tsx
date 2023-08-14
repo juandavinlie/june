@@ -4,6 +4,7 @@ import { useRouter } from "next/router"
 import BorderedBox from "../components/common/BorderedBox"
 import { useContext, useEffect } from "react"
 import { HeaderContext } from "../components/common/HeaderLayout"
+import LoadingWidget from "../components/common/LoadingWidget"
 
 const PreferencesPage = () => {
   const setHeaderTitle = useContext(HeaderContext)
@@ -29,7 +30,7 @@ const PreferencesPage = () => {
       </BorderedBox>
     </Box>
   ) : (
-    "Loading"
+    <LoadingWidget color="black" text="Loading account information..." />
   )
 }
 

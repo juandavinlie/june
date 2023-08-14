@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material"
 import shopifyLogo from "../../../public/shopify.png"
-import manualLogo from "../../../public/pencil.png"
+import juneLogo from "../../../public/June-logo.png"
 import { useContext, useEffect } from "react"
 import { ScreenContext } from "../../_app"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
@@ -13,7 +13,7 @@ const AddStorePage = () => {
   const isMobileScreen = useContext(ScreenContext)
   const integrations = [
     ["Link with Shopify", shopifyLogo, "https://apps.shopify.com/june-ai"],
-    ["Manual Entry", manualLogo, "/stores/add/manual"],
+    ["Manual Entry", juneLogo, "/stores/add/manual"],
   ]
 
   const setHeaderTitle = useContext(HeaderContext)
