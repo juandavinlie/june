@@ -5,7 +5,10 @@ import StoreProductsTab from "./StoreProductsTab"
 import StoreSummaryTab from "./StoreSummaryTab"
 
 const StoreTabs = () => {
-  const bodies = [<StoreSummaryTab />, <StoreProductsTab />]
+  const bodies = [
+    <StoreSummaryTab key="summary" />,
+    <StoreProductsTab key="products" />,
+  ]
   const [selectedIndex, setSelectedIndex] = useState(0)
 
   const handleChange = (event: React.SyntheticEvent, newIndex: number) => {
