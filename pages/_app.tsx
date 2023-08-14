@@ -20,7 +20,7 @@ export default function App({ Component, pageProps, ...appProps }: AppProps) {
   const getContent = () => {
     if (
       appProps.router.pathname.startsWith("/login") ||
-      appProps.router.pathname.startsWith("/conversation") ||
+      appProps.router.pathname.startsWith("/c") ||
       appProps.router.pathname.startsWith("/privacy")
     ) {
       return <Component {...pageProps} />

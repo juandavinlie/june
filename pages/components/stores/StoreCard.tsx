@@ -12,6 +12,9 @@ const StoreCard = ({ store }: StoreCardProps) => {
   return (
     <Link href={`/stores/${store.storeId}`}>
       <Box
+        display="flex"
+        flexDirection="column"
+        gap="5px"
         minHeight="90px"
         width="200px"
         p="10px"
