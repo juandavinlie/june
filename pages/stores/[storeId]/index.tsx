@@ -13,12 +13,9 @@ import StoreTabs from "@/pages/components/stores/StoreTabs"
 import {
   StoreProductsHook,
   useStoreProducts,
-} from "@/pages/hooks/stores/useStoreProducts"
-import {
-  EmbeddingsHook,
-  useEmbeddings,
-} from "@/pages/hooks/stores/useEmbeddings"
-import { SyncingHook, useSyncing } from "@/pages/hooks/stores/useSyncing"
+} from "@/hooks/stores/useStoreProducts"
+import { EmbeddingsHook, useEmbeddings } from "@/hooks/stores/useEmbeddings"
+import { SyncingHook, useSyncing } from "@/hooks/stores/useSyncing"
 import LoadingWidget from "@/pages/components/common/LoadingWidget"
 
 export const StoreContext = createContext<Store>(new Store({}))

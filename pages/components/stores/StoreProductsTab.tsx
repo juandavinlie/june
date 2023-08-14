@@ -5,9 +5,7 @@ import ProductCard from "./shopify/ProductCard"
 
 import LoadingWidget from "@/pages/components/common/LoadingWidget"
 import emptyLogo from "../../../public/box.png"
-import {
-  StoreProductsHook,
-} from "@/pages/hooks/stores/useStoreProducts"
+import { StoreProductsHook } from "@/hooks/stores/useStoreProducts"
 import { useContext, useState } from "react"
 import { Store } from "@/models/Store"
 import { StoreContext, StoreProductsContext } from "@/pages/stores/[storeId]"

@@ -16,11 +16,8 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy"
 import CheckIcon from "@mui/icons-material/Check"
 import LaunchIcon from "@mui/icons-material/Launch"
 import { openInNewTab } from "@/utils"
-import {
-  EmbeddingsHook,
-  useEmbeddings,
-} from "@/pages/hooks/stores/useEmbeddings"
-import { SyncingHook } from "@/pages/hooks/stores/useSyncing"
+import { EmbeddingsHook, useEmbeddings } from "@/hooks/stores/useEmbeddings"
+import { SyncingHook } from "@/hooks/stores/useSyncing"
 
 const dateOptions: Intl.DateTimeFormatOptions = {
   weekday: "long",
