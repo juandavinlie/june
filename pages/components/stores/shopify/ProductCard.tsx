@@ -1,17 +1,19 @@
 import { Box, Divider, Typography } from "@mui/material"
 import { ShopifyProduct } from "../../../../models/ShopifyProduct"
 import { useContext } from "react"
-import { ScreenContext } from "@/pages/_app"
 import { Product } from "@/models/Product"
 import { Variant } from "../AddProductPopup"
+import { StoreContext } from "@/pages/stores/[storeId]"
+import { Store } from "@/models/Store"
+import { currencyLocale } from "@/utils"
 
 interface ProductCardProps {
   product: Product
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-  const isMobileScreen = useContext(ScreenContext)
-  console.log(product)
+  const store: Store = useContext(StoreContext)
+
   return (
     <Box
       display="flex"
@@ -38,6 +40,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
           }}
         >
           {product.productVariants.map((variant: Variant, idx) => {
+            const formatString = new Intl.NumberFormat(
+              currencyLocale(store.currency),
+              {
+                style: "currency",
+                currency: store.currency ? store.currency : "USD",
+                minimumFractionDigits: 2,
+              }
+            )
+            const priceFormattedString = formatString.format(variant.price!)
             return (
               <Box
                 display="flex"
@@ -49,9 +60,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
               >
                 <Box display="flex" alignItems="flex-end" gap="5px">
                   <Typography>{variant.title}</Typography>
-                  <Typography variant="h6">{`Stock: ${variant.inventory_quantity}`}</Typography>
+                  {/* <Typography variant="h6">{`Stock: ${variant.inventory_quantity}`}</Typography> */}
                 </Box>
-                <Typography>{variant.price}</Typography>
+                <Typography>{`${priceFormattedString}`}</Typography>
               </Box>
             )
           })}

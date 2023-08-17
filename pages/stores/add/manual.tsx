@@ -1,13 +1,27 @@
 import BorderedBox from "@/pages/components/common/BorderedBox"
 import { HeaderContext } from "@/pages/components/common/HeaderLayout"
-import { Box, Button, Divider, TextField, Typography } from "@mui/material"
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Divider,
+  TextField,
+  Typography,
+} from "@mui/material"
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/router"
 import { useContext, useEffect, useState } from "react"
 
+const supportedCurrencies = [
+  "Indonesian Rupiah (IDR)",
+  "Singapore Dollars (SGD)",
+]
+
 const ManualEntryPage = () => {
   const [storeName, setStoreName] = useState("")
   const [category, setCategory] = useState("")
+  const [currencyValue, setCurrencyValue] = useState("")
+  const [inputCurrencyValue, setInputCurrencyValue] = useState("")
 
   const [isCreatingStore, setIsCreatingStore] = useState(false)
   const setHeaderTitle = useContext(HeaderContext)
@@ -19,6 +33,8 @@ const ManualEntryPage = () => {
   const clearFields = () => {
     setStoreName("")
     setCategory("")
+    setCurrencyValue("")
+    setInputCurrencyValue("")
   }
 
   const createManualStore = async () => {
@@ -28,6 +44,10 @@ const ManualEntryPage = () => {
       user_id: user!.id,
       name: storeName,
       integration: "manual",
+      currency: currencyValue.slice(
+        currencyValue.indexOf("(") + 1,
+        currencyValue.indexOf(")")
+      ),
     })
     if (!error) {
       return storeId
@@ -39,7 +59,7 @@ const ManualEntryPage = () => {
   const next = async () => {
     try {
       setIsCreatingStore(true)
-      if (storeName && category) {
+      if (storeName && category && currencyValue) {
         const storeId = await createManualStore()
         router.push(`/stores/${storeId}`)
       }
@@ -50,7 +70,11 @@ const ManualEntryPage = () => {
   }
 
   useEffect(() => {
-    setHeaderTitle([{ text: "Stores", link: "/stores" }, { text: "Add", link: "/stores/add" }, { text: "Manual", link: "/stores/add/manual" }])
+    setHeaderTitle([
+      { text: "Stores", link: "/stores" },
+      { text: "Add", link: "/stores/add" },
+      { text: "Manual", link: "/stores/add/manual" },
+    ])
   }, [])
 
   return (
@@ -66,6 +90,9 @@ const ManualEntryPage = () => {
             sx={{ width: "50%" }}
             placeholder="e.g. Lavista"
             value={storeName}
+            inputProps={{
+              style: { fontSize: 14, padding: 10 },
+            }}
             onChange={(e) => {
               setStoreName(e.currentTarget.value)
             }}
@@ -77,9 +104,41 @@ const ManualEntryPage = () => {
             sx={{ width: "50%" }}
             placeholder="e.g. Clothing"
             value={category}
+            inputProps={{
+              style: { fontSize: 14, padding: 10 },
+            }}
             onChange={(e) => {
               setCategory(e.currentTarget.value)
             }}
+          />
+        </Box>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6">Currency</Typography>
+          <Autocomplete
+            value={currencyValue}
+            onChange={(event: any, newValue: any) => {
+              setCurrencyValue(newValue ? (newValue as string) : "")
+            }}
+            inputValue={inputCurrencyValue}
+            onInputChange={(event: any, newInputValue: string) => {
+              setInputCurrencyValue(newInputValue)
+            }}
+            disablePortal
+            id="currency-auto-complete"
+            options={supportedCurrencies}
+            sx={{
+              width: "50%",
+              "& .MuiOutlinedInput-root": {
+                padding: "4px!important",
+                fontSize: "14px!important"
+              },
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder="e.g. Indonesian Rupiah (IDR)"
+              />
+            )}
           />
         </Box>
         <Box display="flex" justifyContent="flex-end" gap="5px">

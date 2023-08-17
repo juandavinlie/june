@@ -67,12 +67,7 @@ const StorePage = () => {
 
   // SYNCING
   const syncingHookObj: SyncingHook = useSyncing(storeId as string)
-  const {
-    isSyncing,
-    syncTimestamp,
-    getShopifySyncingStatuses,
-    syncShopifyStoreData,
-  } = syncingHookObj
+  const { isSyncing, getShopifySyncingStatuses } = syncingHookObj
 
   // INITIALISATIONS
   useEffect(() => {

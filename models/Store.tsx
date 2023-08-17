@@ -5,6 +5,8 @@ export class Store {
   integration: string
   shopifyAccessToken: string | null
   shopifyDomain: string | null
+  currency: string | null
+  currencySymbol: string
 
   constructor(store: any) {
     this.storeId = store.id
@@ -13,5 +15,16 @@ export class Store {
     this.integration = store.integration
     this.shopifyAccessToken = store.shopify_access_token
     this.shopifyDomain = store.shopify_domain
+    this.currency = store.currency
+
+    switch (this.currency) {
+      case "Indonesian Rupiah (IDR)":
+        this.currencySymbol = "Rp"
+      case "Singapore Dollars (SGD)":
+        this.currencySymbol = "S$"
+      default: {
+        this.currencySymbol = ""
+      }
+    }
   }
 }
