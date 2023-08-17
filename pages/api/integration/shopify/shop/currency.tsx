@@ -10,33 +10,13 @@ export default async function handler(
   try {
     const supabaseServerClient = createServerSupabaseClient({ req, res })
 
-    const { storeId } = req.body
-
-    // Get Store Data
-    const { data, error } = await supabaseServerClient
-      .from("store")
-      .select()
-      .eq("id", storeId)
-
-    if (error) {
-      throw "Getting Store Data failed"
-    }
-
-    if (data.length === 0) {
-      res
-        .status(404)
-        .json({ message: `No store with store id ${storeId} found` })
-    }
-
-    const store = new Store(data[0])
+    const { shopify_domain, shopify_access_token } = req.query
 
     const currenciesResponse = await fetch(
-      `https://${
-        store!.shopifyDomain
-      }/admin/api/${LATEST_API_VERSION}/currencies.json`,
+      `https://${shopify_domain}/admin/api/${LATEST_API_VERSION}/currencies.json`,
       {
         method: "GET",
-        headers: { "X-Shopify-Access-Token": store!.shopifyAccessToken! },
+        headers: { "X-Shopify-Access-Token": shopify_access_token as string },
       }
     )
 

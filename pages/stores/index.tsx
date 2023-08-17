@@ -45,13 +45,10 @@ const Stores = () => {
     if (!shopResponse.ok) {
       throw "Shop response is not ok"
     }
-    // Create Store
-    const shopData = await shopResponse.json()
-    const storeId = "shopify_" + shopData.shop.id.toString()
 
     // Fetch Currency Data
     const currencyResponse = await fetch(
-      `/api/stores/${storeId}/shopify/currency`
+      `/api/integration/shopify/shop/currency?shopify_domain=${shopifyDomain}&shopify_access_token=${shopifyAccessToken}`
     )
 
     if (!currencyResponse.ok) {
@@ -59,6 +56,9 @@ const Stores = () => {
     }
     const { mainCurrency } = await currencyResponse.json()
 
+    // Create store
+    const shopData = await shopResponse.json()
+    const storeId = "shopify_" + shopData.shop.id.toString()
     const { data, error } = await supabase
       .from("store")
       .upsert(
