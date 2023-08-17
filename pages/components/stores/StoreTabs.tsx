@@ -1,8 +1,9 @@
 import { Box, Tabs } from "@mui/material"
 import { StyledTab } from "../../components/stores/StyledTab"
-import { useState } from "react"
+import { useContext, useState } from "react"
 import StoreProductsTab from "./StoreProductsTab"
 import StoreSummaryTab from "./StoreSummaryTab"
+import { StoreProductsContext } from "@/pages/stores/[storeId]"
 
 const StoreTabs = () => {
   const bodies = [
@@ -10,6 +11,7 @@ const StoreTabs = () => {
     <StoreProductsTab key="products" />,
   ]
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const { isLoadingProducts, products } = useContext(StoreProductsContext)
 
   const handleChange = (event: React.SyntheticEvent, newIndex: number) => {
     setSelectedIndex(newIndex)
@@ -24,8 +26,8 @@ const StoreTabs = () => {
           textColor="secondary"
           indicatorColor="secondary"
         >
-          <StyledTab label="Summary" />
-          <StyledTab label="Products" />
+          <StyledTab label="Overview" />
+          <StyledTab label={isLoadingProducts || !products ? "Products" : `Products (${products.length})`} />
         </Tabs>
       </Box>
       <Box height="auto" width="100%" paddingTop="40px">

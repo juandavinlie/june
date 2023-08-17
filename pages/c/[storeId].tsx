@@ -1,6 +1,6 @@
 import { Box, InputAdornment, TextField, Typography } from "@mui/material"
 import { useRouter } from "next/router"
-import { useEffect, useRef, useState } from "react"
+import { createContext, useEffect, useRef, useState } from "react"
 import { Store } from "../../models/Store"
 import SendIcon from "@mui/icons-material/Send"
 import { Configuration, OpenAIApi } from "openai"
@@ -27,6 +27,8 @@ const model = "gpt-3.5-turbo"
 
 const LATEST_FACTOR = 2
 const NEED_TO_SUMMARISE = false
+
+export const ConversationStoreContext = createContext(new Store({}))
 
 const StoreConversationPage = () => {
   const router = useRouter()
@@ -422,7 +424,11 @@ const StoreConversationPage = () => {
         <Typography>{store!.name}</Typography>
         <Typography>
           Powered by{" "}
-          <Link href="https://usejune.com" target="_blank" rel="noopener noreferrer">
+          <Link
+            href="https://usejune.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             June
           </Link>
         </Typography>
@@ -439,7 +445,7 @@ const StoreConversationPage = () => {
           "&:hover": { overflowY: "overlay" },
         }}
       >
-        <>
+        <ConversationStoreContext.Provider value={store}>
           {conversationIsNotEmpty ? (
             messages.map(
               (messageWithProducts: MessageWithProducts, idx: any) => (
@@ -505,7 +511,7 @@ const StoreConversationPage = () => {
             </>
           )}
           <Box ref={bottomPageRef} />
-        </>
+        </ConversationStoreContext.Provider>
       </Box>
       <Box
         position="absolute"

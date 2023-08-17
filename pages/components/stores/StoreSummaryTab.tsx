@@ -3,13 +3,7 @@ import {
   StoreContext,
   SyncingContext,
 } from "@/pages/stores/[storeId]"
-import {
-  Box,
-  Button,
-  CircularProgress,
-  TextField,
-  Typography,
-} from "@mui/material"
+import { Box, Button, TextField, Typography } from "@mui/material"
 import { useContext, useState } from "react"
 
 import ContentCopyIcon from "@mui/icons-material/ContentCopy"
@@ -67,6 +61,21 @@ const StoreSummaryTab = () => {
 
   return (
     <Box display="flex" flexDirection="column" gap="40px">
+      <Box display="flex" flexDirection="column" gap="10px" maxWidth="600px">
+        <Typography variant="tabtitle">Currency</Typography>
+        {store.currency ? (
+          <Typography variant="h5">
+            Your store uses{" "}
+            <Box component="span" fontWeight="fontWeightMedium">
+              {store.currency}
+            </Box>
+          </Typography>
+        ) : (
+          <Typography variant="h5">
+            Your store's currency has not been set
+          </Typography>
+        )}
+      </Box>
       <Box display="flex" flexDirection="column" gap="10px" maxWidth="600px">
         <Typography variant="tabtitle">Share Link</Typography>
         <TextField

@@ -3,14 +3,24 @@ import { useContext, useState } from "react"
 import { Product } from "../../../models/Product"
 import { ScreenContext } from "@/pages/_app"
 import { Variant } from "../stores/AddProductPopup"
+import { ConversationStoreContext } from "@/pages/c/[storeId]"
+import { currencyLocale } from "@/utils"
 
 interface ConversationProductCardProps {
   product: Product
 }
 
 const ConversationProductCard = ({ product }: ConversationProductCardProps) => {
+  const store = useContext(ConversationStoreContext)
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0)
   const isMobileScreen = useContext(ScreenContext)
+
+  const formatString = new Intl.NumberFormat(currencyLocale(store.currency), {
+    style: "currency",
+    currency: store.currency ? store.currency : "USD",
+    minimumFractionDigits: 2,
+  })
+
   return (
     <Box
       display="flex"
@@ -49,6 +59,7 @@ const ConversationProductCard = ({ product }: ConversationProductCardProps) => {
           }}
         >
           {product.productVariants.map((variant: Variant, idx: number) => {
+            const priceFormattedString = formatString.format(variant.price!)
             return (
               <Box
                 display="flex"
@@ -71,9 +82,9 @@ const ConversationProductCard = ({ product }: ConversationProductCardProps) => {
               >
                 <Box display="flex" alignItems="flex-end" gap="5px">
                   <Typography>{variant.title}</Typography>
-                  <Typography variant="h6">{`Stock: ${variant.inventory_quantity}`}</Typography>
+                  {/* <Typography variant="h6">{`Stock: ${variant.inventory_quantity}`}</Typography> */}
                 </Box>
-                <Typography>{variant.price}</Typography>
+                <Typography>{`${priceFormattedString}`}</Typography>
               </Box>
             )
           })}
@@ -82,7 +93,9 @@ const ConversationProductCard = ({ product }: ConversationProductCardProps) => {
         <Box display="flex" justifyContent="flex-end" gap="5px">
           <Typography>Price:</Typography>
           <Typography>
-            {product.productVariants[selectedVariantIdx].price}
+            {formatString.format(
+              product.productVariants[selectedVariantIdx].price
+            )}
           </Typography>
         </Box>
       </Box>
