@@ -90,7 +90,7 @@ const Stores = () => {
       }
       if (storeId) router.push(`/stores/${storeId}`)
     } catch (error) {
-      console.log("Creating new store failed!")
+      console.log(error)
     }
     setIsCreatingNewStore(false)
   }
