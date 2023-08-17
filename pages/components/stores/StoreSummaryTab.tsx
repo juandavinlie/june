@@ -72,7 +72,7 @@ const StoreSummaryTab = () => {
           </Typography>
         ) : (
           <Typography variant="h5">
-            Your store's currency has not been set
+            Currency has not been set
           </Typography>
         )}
       </Box>
