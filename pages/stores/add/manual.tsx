@@ -8,7 +8,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material"
-import { withStyles } from "@mui/styles"
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/router"
 import { useContext, useEffect, useState } from "react"
@@ -17,15 +16,6 @@ const supportedCurrencies = [
   "Indonesian Rupiah (IDR)",
   "Singapore Dollars (SGD)",
 ]
-
-const NoPaddingAutocomplete = withStyles({
-  inputRoot: {
-    '&&[class*="MuiOutlinedInput-root"] $input': {
-      padding: 0,
-      fontSize: 14,
-    },
-  },
-})(Autocomplete)
 
 const ManualEntryPage = () => {
   const [storeName, setStoreName] = useState("")
@@ -124,7 +114,7 @@ const ManualEntryPage = () => {
         </Box>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">Currency</Typography>
-          <NoPaddingAutocomplete
+          <Autocomplete
             value={currencyValue}
             onChange={(event: any, newValue: any) => {
               setCurrencyValue(newValue ? (newValue as string) : "")
@@ -136,7 +126,13 @@ const ManualEntryPage = () => {
             disablePortal
             id="currency-auto-complete"
             options={supportedCurrencies}
-            sx={{ width: "50%" }}
+            sx={{
+              width: "50%",
+              "& .MuiOutlinedInput-root": {
+                padding: "4px!important",
+                fontSize: "14px!important"
+              },
+            }}
             renderInput={(params) => (
               <TextField
                 {...params}
