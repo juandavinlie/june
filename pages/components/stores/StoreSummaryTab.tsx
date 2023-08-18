@@ -12,6 +12,11 @@ import LaunchIcon from "@mui/icons-material/Launch"
 import { openInNewTab } from "@/utils"
 import { EmbeddingsHook, useEmbeddings } from "@/hooks/stores/useEmbeddings"
 import { SyncingHook } from "@/hooks/stores/useSyncing"
+import CurrencyPicker from "./CurrencyPicker"
+import { Currency } from "@/utils/constants"
+import { Store } from "@/models/Store"
+import { useDispatch } from "react-redux"
+import { addStore, updateStoreCurrency } from "@/redux/UserStoresSlice"
 
 const dateOptions: Intl.DateTimeFormatOptions = {
   weekday: "long",
@@ -23,11 +28,8 @@ const dateOptions: Intl.DateTimeFormatOptions = {
 }
 
 const StoreSummaryTab = () => {
+  const dispatch = useDispatch()
   const store = useContext(StoreContext)
-
-  const conversationPageLink = `${process.env.NEXT_PUBLIC_SHOPIFY_HOST_SCHEME}://${process.env.NEXT_PUBLIC_SHOPIFY_HOST_NAME}/c/${store.storeId}`
-
-  const [linkIsJustCopied, setLinkIsJustCopied] = useState(false)
 
   const embeddingsHookObj: EmbeddingsHook = useContext(EmbeddingsContext)
   const {
@@ -45,6 +47,54 @@ const StoreSummaryTab = () => {
     getShopifySyncingStatuses,
     syncShopifyStoreData,
   } = syncingHookObj
+
+  // Currency
+  const [isChangingCurrency, setIsChangingCurrency] = useState(false)
+  const [currencyValue, setCurrencyValue] = useState<Currency | null>(null)
+  const [inputCurrencyValue, setInputCurrencyValue] = useState("")
+  const [isUpdatingCurrency, setIsUpdatingCurrency] = useState(false)
+  const [updatingError, setUpdatingError] = useState<string | null>(null)
+
+  const saveNewCurrency = async () => {
+    try {
+      setIsUpdatingCurrency(true)
+
+      if (!currencyValue) {
+        throw "New currency cannot be empty"
+      }
+
+      const currencyTicker = currencyValue!.ticker
+
+      const updateResponse = await fetch(
+        `/api/stores/${store.storeId}/update`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currency: currencyTicker }),
+        }
+      )
+
+      setIsUpdatingCurrency(false)
+
+      if (!updateResponse.ok) {
+        throw "Failed updating. Please try again."
+      }
+
+      dispatch(
+        updateStoreCurrency({
+          storeId: store.storeId,
+          currency: currencyTicker,
+        })
+      )
+      setIsChangingCurrency(false)
+    } catch (error) {
+      setUpdatingError(error as string)
+    }
+  }
+
+  // Share Link
+  const conversationPageLink = `${process.env.NEXT_PUBLIC_SHOPIFY_HOST_SCHEME}://${process.env.NEXT_PUBLIC_SHOPIFY_HOST_NAME}/c/${store.storeId}`
+  const [linkIsJustCopied, setLinkIsJustCopied] = useState(false)
 
   const showCopiedLabel = () => {
     setLinkIsJustCopied(true)
@@ -71,9 +121,46 @@ const StoreSummaryTab = () => {
             </Box>
           </Typography>
         ) : (
-          <Typography variant="h5">
-            Currency has not been set
-          </Typography>
+          <Typography variant="h5">Currency has not been set</Typography>
+        )}
+        {isChangingCurrency && (
+          <CurrencyPicker
+            value={currencyValue}
+            setCurrencyValue={setCurrencyValue}
+            inputValue={inputCurrencyValue}
+            setInputCurrencyValue={setInputCurrencyValue}
+          />
+        )}
+        <Box display="flex" gap="10px">
+          <Button
+            variant="outlined"
+            sx={{ width: "100px", gap: "5px" }}
+            onClick={() => {
+              if (!isChangingCurrency) {
+                setIsChangingCurrency(true)
+              } else {
+                saveNewCurrency()
+              }
+            }}
+          >
+            <Typography variant="h5">
+              {!store.currency ? "Set" : isChangingCurrency ? "Save" : "Change"}
+            </Typography>
+          </Button>
+          {isChangingCurrency && (
+            <Button
+              variant="outlined"
+              sx={{ width: "100px", gap: "5px" }}
+              onClick={() => {
+                setIsChangingCurrency(false)
+              }}
+            >
+              <Typography variant="h5">Cancel</Typography>
+            </Button>
+          )}
+        </Box>
+        {updatingError && (
+          <Typography variant="error">{updatingError}</Typography>
         )}
       </Box>
       <Box display="flex" flexDirection="column" gap="10px" maxWidth="600px">
