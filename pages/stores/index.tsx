@@ -107,7 +107,6 @@ const Stores = () => {
           [store.id]: new Store(store),
         }))
       )
-      console.log(formattedStores)
       dispatch(setStores(formattedStores))
     }
   }

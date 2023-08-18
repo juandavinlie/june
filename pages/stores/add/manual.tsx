@@ -1,5 +1,7 @@
 import BorderedBox from "@/pages/components/common/BorderedBox"
 import { HeaderContext } from "@/pages/components/common/HeaderLayout"
+import CurrencyPicker from "@/pages/components/stores/CurrencyPicker"
+import { Currency, supportedCurrencies } from "@/utils/constants"
 import {
   Autocomplete,
   Box,
@@ -12,15 +14,10 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/router"
 import { useContext, useEffect, useState } from "react"
 
-const supportedCurrencies = [
-  "Indonesian Rupiah (IDR)",
-  "Singapore Dollars (SGD)",
-]
-
 const ManualEntryPage = () => {
-  const [storeName, setStoreName] = useState("")
-  const [category, setCategory] = useState("")
-  const [currencyValue, setCurrencyValue] = useState("")
+  const [storeName, setStoreName] = useState<string>("")
+  const [category, setCategory] = useState<string>("")
+  const [currencyValue, setCurrencyValue] = useState<Currency | null>(null)
   const [inputCurrencyValue, setInputCurrencyValue] = useState("")
 
   const [isCreatingStore, setIsCreatingStore] = useState(false)
@@ -33,7 +30,7 @@ const ManualEntryPage = () => {
   const clearFields = () => {
     setStoreName("")
     setCategory("")
-    setCurrencyValue("")
+    setCurrencyValue(null)
     setInputCurrencyValue("")
   }
 
@@ -44,10 +41,7 @@ const ManualEntryPage = () => {
       user_id: user!.id,
       name: storeName,
       integration: "manual",
-      currency: currencyValue.slice(
-        currencyValue.indexOf("(") + 1,
-        currencyValue.indexOf(")")
-      ),
+      currency: currencyValue!.ticker,
     })
     if (!error) {
       return storeId
@@ -114,31 +108,11 @@ const ManualEntryPage = () => {
         </Box>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">Currency</Typography>
-          <Autocomplete
+          <CurrencyPicker
             value={currencyValue}
-            onChange={(event: any, newValue: any) => {
-              setCurrencyValue(newValue ? (newValue as string) : "")
-            }}
+            setCurrencyValue={setCurrencyValue}
             inputValue={inputCurrencyValue}
-            onInputChange={(event: any, newInputValue: string) => {
-              setInputCurrencyValue(newInputValue)
-            }}
-            disablePortal
-            id="currency-auto-complete"
-            options={supportedCurrencies}
-            sx={{
-              width: "50%",
-              "& .MuiOutlinedInput-root": {
-                padding: "4px!important",
-                fontSize: "14px!important"
-              },
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                placeholder="e.g. Indonesian Rupiah (IDR)"
-              />
-            )}
+            setInputCurrencyValue={setInputCurrencyValue}
           />
         </Box>
         <Box display="flex" justifyContent="flex-end" gap="5px">

@@ -9,6 +9,11 @@ const initialState: UserStoresState = {
   stores: {},
 }
 
+interface UpdateCurrencyProps {
+  storeId: string
+  currency: string
+}
+
 export const userStoresSlice = createSlice({
   name: "userStore",
   initialState,
@@ -19,8 +24,15 @@ export const userStoresSlice = createSlice({
     addStore: (state, action: PayloadAction<Store>) => {
       state.stores[action.payload.storeId] = action.payload
     },
+    updateStoreCurrency: (
+      state,
+      action: PayloadAction<UpdateCurrencyProps>
+    ) => {
+      state.stores[action.payload.storeId].currency = action.payload.currency
+    },
   },
 })
 
-export const { setStores, addStore } = userStoresSlice.actions
+export const { setStores, addStore, updateStoreCurrency } =
+  userStoresSlice.actions
 export default userStoresSlice.reducer
