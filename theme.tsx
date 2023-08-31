@@ -6,6 +6,7 @@ declare module "@mui/material/styles" {
     title: React.CSSProperties
     tabtitle: React.CSSProperties
     error: React.CSSProperties
+    button: React.CSSProperties
   }
 
   // allow configuration using `createTheme`
@@ -13,6 +14,7 @@ declare module "@mui/material/styles" {
     title?: React.CSSProperties
     tabtitle?: React.CSSProperties
     error?: React.CSSProperties
+    button?: React.CSSProperties
   }
 }
 
@@ -22,6 +24,7 @@ declare module "@mui/material/Typography" {
     title: true
     tabtitle: true
     error: true
+    button: true
   }
 }
 
@@ -72,6 +75,12 @@ export const themeSettings = createTheme({
       fontWeight: "300",
       color: "red",
       fontSize: 14,
+    },
+    button: {
+      fontFamily: ["Inter", "sans-serif"].join(","),
+      fontWeight: "300",
+      fontSize: 12,
+      textTransform: "none"
     },
   },
   palette: {

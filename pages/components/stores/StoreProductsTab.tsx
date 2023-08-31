@@ -9,9 +9,11 @@ import { StoreProductsHook } from "@/hooks/stores/useStoreProducts"
 import { useContext, useState } from "react"
 import { Store } from "@/models/Store"
 import { StoreContext, StoreProductsContext } from "@/pages/stores/[storeId]"
+import { useRouter } from "next/router"
 
 const StoreProductsTab = () => {
   const store: Store = useContext(StoreContext)
+  const router = useRouter()
   const storeProductsHookObj: StoreProductsHook =
     useContext(StoreProductsContext)
   const { products, isLoadingProducts, getProducts } = storeProductsHookObj
@@ -28,7 +30,8 @@ const StoreProductsTab = () => {
             <Button
               variant="outlined"
               onClick={() => {
-                setIsAddingProduct(true)
+                // setIsAddingProduct(true)
+                router.push(`/stores/${store.storeId}/products/add`)
               }}
             >
               Add product
