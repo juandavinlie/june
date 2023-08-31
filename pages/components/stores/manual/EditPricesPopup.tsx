@@ -116,6 +116,9 @@ const EditPricesPopup = ({ removePopup, currency }: EditPricesPopupProps) => {
                       </InputAdornment>
                     ),
                   }}
+                  required
+                  error={!variant.price}
+                  helperText={!variant.price ? "Price can't be blank" : ""}
                   onChange={(e: any) => {
                     setTempVariantPrice(e.currentTarget.value, idx)
                   }}

@@ -2,6 +2,7 @@ import AddProductSectionBox from "@/pages/components/stores/manual/AddProductSec
 import {
   Box,
   Button,
+  CircularProgress,
   Divider,
   InputAdornment,
   Link,
@@ -22,17 +23,16 @@ import Dropzone from "react-dropzone"
 import Image from "next/image"
 import { useRouter } from "next/router"
 import { useStore } from "@/hooks/stores/useStore"
-import { currencyLocale, getCurrencySymbol } from "@/utils"
 import LoadingWidget from "@/pages/components/common/LoadingWidget"
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
 import PropertyBox from "@/pages/components/stores/manual/PropertyBox"
 import EditPricesPopup from "@/pages/components/stores/manual/EditPricesPopup"
 import { HeaderContext } from "@/pages/components/common/HeaderLayout"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
 
 export interface Property {
   name: string | null
-  values: [string]
-  isEditing: boolean
+  values: string[]
+  isEditing?: boolean
 }
 
 export interface Variant {
@@ -57,13 +57,16 @@ const AddProductPage = () => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [image, setImage] = useState<File | null>(null)
-  const [universalPrice, setUniversalPrice] = useState<number | null>(null)
   const [properties, setProperties] = useState<Property[]>([])
   const [variants, setVariants] = useState<Variant[]>([])
+  const [link, setLink] = useState<string | null>(null)
 
   const [deletedVariants, setDeletedVariants] = useState<Set<string>>(new Set())
-
   const [isEditingPrices, setIsEditingPrices] = useState<boolean>(false)
+  const [isSaving, setIsSaving] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string>("")
+
+  const supabase = useSupabaseClient()
 
   // Properties
   const addNewOption = () => {
@@ -75,6 +78,25 @@ const AddProductPage = () => {
       copy.push({ name: null, values: [""], isEditing: true } as Property)
       setProperties(copy)
     }
+  }
+
+  const processProperties = () => {
+    const processedProperties: Property[] = []
+    for (let i = 0; i < properties.length; i++) {
+      let property = properties[i]
+      delete property.isEditing
+      if (!property.name) {
+        return []
+      }
+      property.values = property.values.filter(
+        (value: string) => value.length > 0
+      )
+      if (!property.values) {
+        return []
+      }
+      processedProperties.push(property)
+    }
+    return processedProperties
   }
 
   // Variants
@@ -126,6 +148,77 @@ const AddProductPage = () => {
     }
   }
 
+  const processVariants = () => {
+    return variants.filter(
+      (variant: Variant) =>
+        variant.title && variant.price && !deletedVariants.has(variant.title)
+    )
+  }
+
+  // SAVE
+  const saveNewProduct = async () => {
+    try {
+      setIsSaving(true)
+
+      // Preprocessing
+      const processedProperties = processProperties()
+      const processedVariants = processVariants()
+
+      // Validation
+      if (!title) throw "Title is required"
+      else if (!description) throw "Description is required"
+      else if (processedProperties.length === 0)
+        throw "At least one property is required"
+      else if (processedVariants.length === 0)
+        throw "At least one variant is required"
+      else if (!image) throw "Image is required"
+
+      const imageId = crypto.randomUUID()
+      const fullImagePath = `${imageId}_${image!.name}`
+      const bucketName = `/products_images/manual/${storeId}`
+
+      const { data: imageData, error: imageError } = await supabase.storage
+        .from(bucketName)
+        .upload(fullImagePath, image)
+
+      if (imageError) {
+        console.log(imageError)
+        throw "Image upload failed."
+      }
+
+      const { data: imageUrlData } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(fullImagePath)
+
+      const response = await fetch(
+        `/api/stores/${storeId}/manual/add_product`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            description,
+            properties: processedProperties,
+            variants: processedVariants,
+            image: image ? imageUrlData.publicUrl : null,
+            link,
+          }),
+        }
+      )
+
+      const productData = await response.json()
+
+      if (!response.ok) {
+        throw productData.message
+      }
+      router.replace(`/stores/${store.storeId}`)
+    } catch (error) {
+      setErrorMessage(error as string)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   // SIDE EFFECTS
   useEffect(() => {
     if (!router.isReady) return
@@ -137,7 +230,10 @@ const AddProductPage = () => {
     setHeaderTitle([
       { text: "Stores", link: "/stores" },
       { text: store.name, link: `/stores/${storeId as string}` },
-      { text: "Add product", link: `/stores/${storeId as string}/products/add` },
+      {
+        text: "Add product",
+        link: `/stores/${storeId as string}/products/add`,
+      },
     ])
   }, [router.isReady])
 
@@ -150,6 +246,7 @@ const AddProductPage = () => {
   return store ? (
     <Box display="flex" flexDirection="column" p="20px" gap="20px">
       <AddProductSectionBox>
+        <Typography variant="title">Product Information</Typography>
         <Typography variant="h5">Title</Typography>
         <TextField
           value={title}
@@ -158,6 +255,9 @@ const AddProductPage = () => {
             style: { fontSize: 14, padding: 10 },
           }}
           InputProps={{ sx: { borderRadius: 3, marginBottom: 1 } }}
+          required
+          error={!title}
+          helperText={!title ? "Title is required" : ""}
           onChange={(e: any) => {
             setTitle(e.currentTarget.value)
           }}
@@ -171,6 +271,9 @@ const AddProductPage = () => {
             style: { fontSize: 14, padding: 1, minHeight: 100 },
           }}
           InputProps={{ sx: { borderRadius: 3 } }}
+          required
+          error={!description}
+          helperText={!description ? "Description is required" : ""}
           onChange={(e: any) => {
             setDescription(e.currentTarget.value)
           }}
@@ -216,32 +319,6 @@ const AddProductPage = () => {
           )}
         </Dropzone>
       </AddProductSectionBox>
-      {/* <AddProductSectionBox>
-        <Typography variant="title">Pricing</Typography>
-        <Box height="10px" />
-        <Typography variant="h5">Price</Typography>
-        <TextField
-          type="number"
-          value={universalPrice ? universalPrice : ""}
-          placeholder="0.00"
-          inputProps={{
-            style: { fontSize: 14, padding: 10 },
-          }}
-          InputProps={{
-            sx: { borderRadius: 3, marginBottom: 1 },
-            startAdornment: (
-              <InputAdornment position="start">
-                <Typography variant="h5">
-                  {getCurrencySymbol(store.currency)}
-                </Typography>
-              </InputAdornment>
-            ),
-          }}
-          onChange={(e: any) => {
-            setUniversalPrice(e.currentTarget.value)
-          }}
-        />
-      </AddProductSectionBox> */}
       <PropertiesContext.Provider value={[properties, setProperties]}>
         <AddProductSectionBox>
           <Typography variant="title">Variants & Pricing</Typography>
@@ -267,7 +344,7 @@ const AddProductPage = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography variant="h5">{`Total: ${variants.length} variants`}</Typography>
+            <Typography variant="h5">{`Total: ${variants.length} variant(s)`}</Typography>
             {variants.length > 0 && (
               <Button
                 variant="outlined"
@@ -327,7 +404,7 @@ const AddProductPage = () => {
                     <Link
                       component="button"
                       color="#000000"
-                      sx={{ fontSize: 14 }}
+                      sx={{ fontSize: 12 }}
                       onClick={() => {
                         if (deletedVariants.has(variant.title as string)) {
                           undoDeleteVariant(variant.title as string)
@@ -347,6 +424,20 @@ const AddProductPage = () => {
           </Box>
         </AddProductSectionBox>
       </PropertiesContext.Provider>
+      <AddProductSectionBox>
+        <Typography variant="title">Link (optional)</Typography>
+        <TextField
+          value={link}
+          placeholder="www.example.com/pants"
+          inputProps={{
+            style: { fontSize: 14, padding: 10 },
+          }}
+          InputProps={{ sx: { borderRadius: 3, marginBottom: 1 } }}
+          onChange={(e: any) => {
+            setLink(e.currentTarget.value)
+          }}
+        />
+      </AddProductSectionBox>
       {isEditingPrices && (
         <VariantsContext.Provider value={[variants, setVariants]}>
           <EditPricesPopup
@@ -359,25 +450,35 @@ const AddProductPage = () => {
       )}
       <Box
         display="flex"
-        justifyContent="flex-end"
-        gap="10px"
+        justifyContent="space-between"
         alignItems="center"
         maxWidth="620px"
       >
-        <Button
-          variant="outlined"
-          onClick={() => {}}
-          sx={{ textTransform: "none", width: "50px", height: "40px" }}
-        >
-          <Typography variant="button">Cancel</Typography>
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={() => {}}
-          sx={{ textTransform: "none", width: "50px", height: "40px" }}
-        >
-          <Typography variant="button">Save</Typography>
-        </Button>
+        <Typography variant="error">{errorMessage}</Typography>
+        <Box display="flex" gap="10px">
+          <Button
+            variant="outlined"
+            disabled={isSaving}
+            onClick={() => {}}
+            sx={{ textTransform: "none", width: "50px", height: "40px" }}
+          >
+            <Typography variant="button">Cancel</Typography>
+          </Button>
+          <Button
+            variant="outlined"
+            disabled={isSaving}
+            onClick={() => {
+              saveNewProduct()
+            }}
+            sx={{ textTransform: "none", width: "50px", height: "40px" }}
+          >
+            {isSaving ? (
+              <CircularProgress color="secondary" size="1rem" />
+            ) : (
+              <Typography variant="button">Save</Typography>
+            )}
+          </Button>
+        </Box>
       </Box>
     </Box>
   ) : (

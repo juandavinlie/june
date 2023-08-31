@@ -73,7 +73,7 @@ export const themeSettings = createTheme({
     error: {
       fontFamily: ["Inter", "sans-serif"].join(","),
       fontWeight: "300",
-      color: "red",
+      color: "#d2302f",
       fontSize: 14,
     },
     button: {

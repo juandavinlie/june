@@ -16,11 +16,52 @@ const PropertyBox = ({ idx }: { idx: number }) => {
   const [editingMemory, setEditingMemory] = useState<{ [id: number]: string }>(
     {}
   )
+  const [stackMemory, setStackMemory] = useState<{ [id: number]: string[] }>({})
+  const property = properties[idx]
+
+  const countPropertyValues = () => {
+    const count: { [id: string]: number } = {}
+    for (let i = 0; i < property.values.length; i++) {
+      const value = property.values[i]
+      if (!value) continue
+
+      if (count[value]) {
+        count[value] += 1
+      } else {
+        count[value] = 1
+      }
+    }
+    return count
+  }
+
+  const valuesCount = countPropertyValues()
 
   const setEditingMemoryValue = (optIdx: number, value: string) => {
     let copy = structuredClone(editingMemory)
     copy[optIdx] = value
     setEditingMemory(copy)
+  }
+
+  const resetEditingMemoryValue = (optIdx: number) => {
+    let copy = structuredClone(editingMemory)
+    delete copy[optIdx]
+    setEditingMemory(copy)
+  }
+
+  const addStackMemoryValueForIdx = (optIdx: number, value: string) => {
+    let copy = structuredClone(stackMemory)
+    if (optIdx in copy) {
+      copy[optIdx].push(value)
+    } else {
+      copy[optIdx] = [value]
+    }
+    setStackMemory(copy)
+  }
+
+  const resetStackMemoryForIdx = (optIdx: number) => {
+    let copy = structuredClone(stackMemory)
+    copy[optIdx] = []
+    setStackMemory(copy)
   }
 
   const setOptionName = (name: string) => {
@@ -38,13 +79,20 @@ const PropertyBox = ({ idx }: { idx: number }) => {
 
     if (copy[idx].values[optIdx] !== "" && option === "") {
       setEditingMemoryValue(optIdx, copy[idx].values[optIdx])
-      console.log(editingMemory)
     }
+
+    if (option !== "") addStackMemoryValueForIdx(optIdx, option)
 
     copy[idx].values[optIdx] = option
     if (addNewNext && optIdx === copy[idx].values.length - 1) {
       copy[idx].values.push("")
     }
+    setProperties(copy)
+  }
+
+  const resetOptionValue = (optIdx: number) => {
+    let copy: Property[] = structuredClone(properties)
+    copy[idx].values.splice(optIdx, 1)
     setProperties(copy)
   }
 
@@ -66,7 +114,14 @@ const PropertyBox = ({ idx }: { idx: number }) => {
     setProperties(copy)
   }
 
-  const property = properties[idx]
+  const containsAtLeastOneValue = (values: string[]) => {
+    for (let i = 0; i < values.length; i++) {
+      if (values[i]) {
+        return true
+      }
+    }
+    return false
+  }
 
   return (
     <Box display="flex" flexDirection="column" gap="5px" p="0 30px">
@@ -80,11 +135,19 @@ const PropertyBox = ({ idx }: { idx: number }) => {
               style: { fontSize: 14, padding: 10 },
             }}
             InputProps={{ sx: { borderRadius: 3, marginBottom: 1 } }}
+            required
+            error={!property.name}
+            helperText={!property.name ? "Option name is required" : ""}
             onChange={(e: any) => {
               setOptionName(e.currentTarget.value)
             }}
           />
-          <Box display="flex" flexDirection="column" paddingLeft="10px">
+          <Box
+            display="flex"
+            flexDirection="column"
+            paddingLeft="10px"
+            gap="5px"
+          >
             <Typography variant="h5">Option values</Typography>
             {property.values.map((option: string, optIdx: number) => {
               return (
@@ -97,6 +160,22 @@ const PropertyBox = ({ idx }: { idx: number }) => {
                       style: { fontSize: 14, padding: 10 },
                     }}
                     InputProps={{ sx: { borderRadius: 3, marginBottom: 1 } }}
+                    required
+                    error={
+                      !containsAtLeastOneValue(property.values) ||
+                      (option !== "" &&
+                        option in valuesCount &&
+                        valuesCount[option] > 1)
+                    }
+                    helperText={
+                      !containsAtLeastOneValue(property.values)
+                        ? "Option value is required"
+                        : option !== "" &&
+                          option in valuesCount &&
+                          valuesCount[option] > 1
+                        ? "Duplicates are not allowed"
+                        : ""
+                    }
                     onChange={(e: any) => {
                       setOptionValue(
                         e.currentTarget.value,
@@ -105,10 +184,29 @@ const PropertyBox = ({ idx }: { idx: number }) => {
                       )
                     }}
                     onBlur={() => {
-                      console.log(option)
-                      console.log(editingMemory)
                       if (option === "" && optIdx in editingMemory) {
                         setOptionValue(editingMemory[optIdx], optIdx, false)
+                      } else if (
+                        option !== "" &&
+                        option in valuesCount &&
+                        valuesCount[option] > 1
+                      ) {
+                        let lastValidValue = ""
+                        let stack = stackMemory[optIdx]
+                        while (stack.length > 0) {
+                          console.log(stack)
+                          let popped = stack.pop()
+                          if (popped && !(popped in valuesCount)) {
+                            lastValidValue = popped
+                            resetStackMemoryForIdx(optIdx)
+                            break
+                          }
+                        }
+                        if (lastValidValue) {
+                          setOptionValue(lastValidValue, optIdx, false)
+                        } else {
+                          resetOptionValue(optIdx)
+                        }
                       }
                     }}
                   />
@@ -127,17 +225,18 @@ const PropertyBox = ({ idx }: { idx: number }) => {
           <Button
             variant="outlined"
             onClick={() => {
-              if (
-                property.name &&
-                property.values.length > 0 &&
-                property.values[0]
-              ) {
+              if (property.name && containsAtLeastOneValue(property.values)) {
                 setOptionIsEditing(false)
               }
             }}
-            sx={{ textTransform: "none", width: "100px", gap: "5px" }}
+            sx={{
+              textTransform: "none",
+              width: "50px",
+              height: "40px",
+              gap: "5px",
+            }}
           >
-            <Typography variant="h5">Done</Typography>
+            <Typography variant="button">Done</Typography>
           </Button>
         </>
       ) : (
