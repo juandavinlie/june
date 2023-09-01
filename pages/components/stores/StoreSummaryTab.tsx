@@ -4,7 +4,7 @@ import {
   SyncingContext,
 } from "@/pages/stores/[storeId]"
 import { Box, Button, TextField, Typography } from "@mui/material"
-import { useContext, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 
 import ContentCopyIcon from "@mui/icons-material/ContentCopy"
 import CheckIcon from "@mui/icons-material/Check"

@@ -1,13 +1,10 @@
-import { Box, Button, Typography } from "@mui/material"
+import { Box, Typography } from "@mui/material"
 import { useRouter } from "next/router"
 import { createContext, useContext, useEffect, useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { RootState } from "@/redux/config"
 
 import shopifyLogo from "../../../public/shopify.png"
 import IntegrationLogo from "@/pages/components/common/IntegrationLogo"
 import { Store } from "@/models/Store"
-import { addStore } from "@/redux/UserStoresSlice"
 import { HeaderContext } from "@/pages/components/common/HeaderLayout"
 import StoreTabs from "@/pages/components/stores/StoreTabs"
 import {
@@ -32,7 +29,6 @@ const StorePage = () => {
   const router = useRouter()
   const setHeaderTitle = useContext(HeaderContext)
   const { storeId } = router.query
-
   const { store, getStore } = useStore(storeId as string)
 
   // PRODUCTS
