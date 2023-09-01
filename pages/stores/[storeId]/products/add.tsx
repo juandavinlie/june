@@ -211,12 +211,17 @@ const AddProductPage = () => {
       if (!response.ok) {
         throw productData.message
       }
-      router.replace(`/stores/${store.storeId}`)
+      navigateBack()
     } catch (error) {
       setErrorMessage(error as string)
     } finally {
       setIsSaving(false)
     }
+  }
+
+  // NAVIGATION
+  const navigateBack = () => {
+    router.replace(`/stores/${store.storeId}`)
   }
 
   // SIDE EFFECTS
@@ -331,9 +336,7 @@ const AddProductPage = () => {
               component="button"
               color="#4f88df"
               sx={{ fontSize: 14 }}
-              onClick={() => {
-                addNewOption()
-              }}
+              onClick={addNewOption}
             >
               Add options like size or color
             </Link>
@@ -365,6 +368,7 @@ const AddProductPage = () => {
                   display="flex"
                   justifyContent="space-between"
                   alignItems="center"
+                  key={variant.title}
                 >
                   <Typography
                     variant="title"
@@ -459,7 +463,7 @@ const AddProductPage = () => {
           <Button
             variant="outlined"
             disabled={isSaving}
-            onClick={() => {}}
+            onClick={navigateBack}
             sx={{ textTransform: "none", width: "50px", height: "40px" }}
           >
             <Typography variant="button">Cancel</Typography>
@@ -467,9 +471,7 @@ const AddProductPage = () => {
           <Button
             variant="outlined"
             disabled={isSaving}
-            onClick={() => {
-              saveNewProduct()
-            }}
+            onClick={saveNewProduct}
             sx={{ textTransform: "none", width: "50px", height: "40px" }}
           >
             {isSaving ? (

@@ -97,6 +97,7 @@ const EditPricesPopup = ({ removePopup, currency }: EditPricesPopupProps) => {
                 alignItems="center"
                 p="10px 0"
                 borderBottom="0.5px solid #d3d3d3"
+                key={idx}
               >
                 <Typography variant="title">{variant.title}</Typography>
                 <TextField

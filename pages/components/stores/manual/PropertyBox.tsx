@@ -42,12 +42,6 @@ const PropertyBox = ({ idx }: { idx: number }) => {
     setEditingMemory(copy)
   }
 
-  const resetEditingMemoryValue = (optIdx: number) => {
-    let copy = structuredClone(editingMemory)
-    delete copy[optIdx]
-    setEditingMemory(copy)
-  }
-
   const addStackMemoryValueForIdx = (optIdx: number, value: string) => {
     let copy = structuredClone(stackMemory)
     if (optIdx in copy) {
@@ -151,7 +145,7 @@ const PropertyBox = ({ idx }: { idx: number }) => {
             <Typography variant="h5">Option values</Typography>
             {property.values.map((option: string, optIdx: number) => {
               return (
-                <Box display="flex" alignItems="center" gap="10px">
+                <Box display="flex" alignItems="center" gap="10px" key={optIdx}>
                   <TextField
                     value={option}
                     placeholder={optIdx === 0 ? "Medium" : "Add another value"}
