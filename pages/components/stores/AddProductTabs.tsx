@@ -3,7 +3,7 @@ import { useContext, useState } from "react"
 import { StyledTab } from "./StyledTab"
 import {
   PropertiesContext,
-  Property,
+  Propertyy,
   Variant,
   VariantsContext,
 } from "./AddProductPopup"
@@ -21,7 +21,7 @@ const PropertiesTab = () => {
   ) => {
     const copy = properties.slice()
     const existingRecord = copy[idx]
-    const newRecord: Property = {
+    const newRecord: Propertyy = {
       name: name !== null ? name : existingRecord["name"],
       values: values !== null ? values : existingRecord["values"],
     }
@@ -42,7 +42,7 @@ const PropertiesTab = () => {
       }}
     >
       {properties.length > 0 ? (
-        properties.map((property: Property, idx: number) => (
+        properties.map((property: Propertyy, idx: number) => (
           <Box
             display="flex"
             justifyContent="space-between"
@@ -241,7 +241,7 @@ const AddProductTabs = () => {
         price: null,
       })
     } else {
-      const curProperty: Property = properties[curIdx]
+      const curProperty: Propertyy = properties[curIdx]
 
       if (!curProperty.name || !curProperty.values) {
         return

@@ -16,13 +16,13 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import CircularProgress from "@mui/material/CircularProgress"
 import { Store } from "@/models/Store"
 
-export interface Property {
+export interface Propertyy {
   name: string | null
   values: string | null
 }
 
 export const PropertiesContext = createContext<
-  [Property[], (properties: Property[]) => void]
+  [Propertyy[], (properties: Propertyy[]) => void]
 >([[], () => {}])
 
 export interface Variant {
@@ -40,9 +40,9 @@ interface AddProductPopupProps {
   removePopup: () => void
 }
 
-const processProperties = (properties: Property[]) => {
+const processProperties = (properties: Propertyy[]) => {
   return properties.filter(
-    (property: Property) => property.name !== null && property.values !== null
+    (property: Propertyy) => property.name !== null && property.values !== null
   )
 }
 
@@ -61,7 +61,7 @@ const AddProductPopup = ({ store, removePopup }: AddProductPopupProps) => {
   const [image, setImage] = useState<File | null>(null)
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
-  const [properties, setProperties] = useState<Property[]>([])
+  const [properties, setProperties] = useState<Propertyy[]>([])
   const [variants, setVariants] = useState<Variant[]>([])
   const [link, setLink] = useState("")
 

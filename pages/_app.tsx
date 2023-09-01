@@ -38,7 +38,7 @@ export default function App({ Component, pageProps, ...appProps }: AppProps) {
       initialSession={pageProps.initialSession}
     >
       <Head>
-        <title>June | Your AI store assistant</title>
+        <title>June - Your AI store assistant</title>
         <link rel="icon" href="/June-01-wrap-32px.png" />
       </Head>
       <ScreenContext.Provider value={useMobileScreen}>

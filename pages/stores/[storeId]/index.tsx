@@ -17,6 +17,7 @@ import {
 import { EmbeddingsHook, useEmbeddings } from "@/hooks/stores/useEmbeddings"
 import { SyncingHook, useSyncing } from "@/hooks/stores/useSyncing"
 import LoadingWidget from "@/pages/components/common/LoadingWidget"
+import { useStore } from "@/hooks/stores/useStore"
 
 export const StoreContext = createContext<Store>(new Store({}))
 export const StoreProductsContext = createContext<StoreProductsHook>(
@@ -29,25 +30,10 @@ export const SyncingContext = createContext<SyncingHook>({} as SyncingHook)
 
 const StorePage = () => {
   const router = useRouter()
-  const dispatch = useDispatch()
   const setHeaderTitle = useContext(HeaderContext)
   const { storeId } = router.query
 
-  const store = useSelector(
-    (state: RootState) => state.userStoresSliceReducer.stores[storeId as string]
-  )
-
-  // GETTERS
-  const getStore = async (storeId: string) => {
-    const response = await fetch(`/api/stores/${storeId}`, {
-      method: "GET",
-    })
-    if (response.ok) {
-      const data = await response.json()
-      const store = new Store(data)
-      dispatch(addStore(store))
-    }
-  }
+  const { store, getStore } = useStore(storeId as string)
 
   // PRODUCTS
   const storeProductsHookObj: StoreProductsHook = useStoreProducts(
@@ -74,7 +60,7 @@ const StorePage = () => {
     if (!router.isReady) return
 
     if (!store) {
-      getStore(storeId as string)
+      getStore()
     }
   }, [router.isReady])
 

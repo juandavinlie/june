@@ -40,3 +40,19 @@ export const currencyTicker = (currency: string | null): string => {
     }
   }
 }
+
+export const getCurrencySymbol = (currency: string | null) => {
+  if (!currency) {
+    return "$"
+  }
+  const locale = currencyLocale(currency)
+  return (0)
+    .toLocaleString(locale, {
+      style: "currency",
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    })
+    .replace(/\d/g, "")
+    .trim()
+}
