@@ -4,19 +4,18 @@ import {
   SyncingContext,
 } from "@/pages/stores/[storeId]"
 import { Box, Button, TextField, Typography } from "@mui/material"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useState } from "react"
 
 import ContentCopyIcon from "@mui/icons-material/ContentCopy"
 import CheckIcon from "@mui/icons-material/Check"
 import LaunchIcon from "@mui/icons-material/Launch"
 import { openInNewTab } from "@/utils"
-import { EmbeddingsHook, useEmbeddings } from "@/hooks/stores/useEmbeddings"
+import { EmbeddingsHook } from "@/hooks/stores/useEmbeddings"
 import { SyncingHook } from "@/hooks/stores/useSyncing"
 import CurrencyPicker from "./CurrencyPicker"
 import { Currency } from "@/utils/constants"
-import { Store } from "@/models/Store"
 import { useDispatch } from "react-redux"
-import { addStore, updateStoreCurrency } from "@/redux/UserStoresSlice"
+import { updateStoreCurrency } from "@/redux/UserStoresSlice"
 
 const dateOptions: Intl.DateTimeFormatOptions = {
   weekday: "long",
@@ -36,7 +35,6 @@ const StoreSummaryTab = () => {
     hasEmbeddings,
     embeddingsTimestamp,
     isEmbedding,
-    getEmbeddingStatuses,
     embedStoreData,
   } = embeddingsHookObj
 
@@ -44,7 +42,6 @@ const StoreSummaryTab = () => {
   const {
     isSyncing,
     syncTimestamp,
-    getShopifySyncingStatuses,
     syncShopifyStoreData,
   } = syncingHookObj
 
