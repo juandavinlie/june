@@ -7,7 +7,7 @@ import { StoreProductsContext } from "@/pages/stores/[storeId]"
 
 const StoreTabs = () => {
   const bodies = [
-    <StoreSummaryTab key="summary" />,
+    <StoreSummaryTab key="overview" />,
     <StoreProductsTab key="products" />,
   ]
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -27,7 +27,13 @@ const StoreTabs = () => {
           indicatorColor="secondary"
         >
           <StyledTab label="Overview" />
-          <StyledTab label={isLoadingProducts || !products ? "Products" : `Products (${products.length})`} />
+          <StyledTab
+            label={
+              isLoadingProducts || !products
+                ? "Products"
+                : `Products (${products.length})`
+            }
+          />
         </Tabs>
       </Box>
       <Box height="auto" width="100%" paddingTop="40px">
