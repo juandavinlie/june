@@ -8,3 +8,8 @@ export const supportedCurrencies: Currency[] = [
   { currency: "Singaporean Dollars", ticker: "SGD" },
   { currency: "United States Dollars", ticker: "USD" },
 ]
+
+export const supportedConversationLanguages: string[] = [
+  "English",
+  "Bahasa Indonesia",
+]
