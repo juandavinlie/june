@@ -17,6 +17,7 @@ import { Product } from "@/models/Product"
 import { objectifyProduct } from "@/utils"
 import LoadingWidget from "../components/common/LoadingWidget"
 import Link from "next/link"
+import LanguagePicker from "../components/conversation/LanguagePicker"
 
 const configuration = new Configuration({
   apiKey: process.env.NEXT_PUBLIC_OPEN_AI_KEY,
@@ -39,18 +40,26 @@ const StoreConversationPage = () => {
       state.productsSliceReducer.products[router.query.storeId as string]
   )
 
+  const [language, setLanguage] = useState<string| undefined>("English")
+  const [inputLanguage, setInputLanguage] = useState<string>("")
+
   const [prompt, setPrompt] = useState<string>("")
   const [submittedPrompt, setSubmittedPrompt] = useState<string>("")
 
-  const categories = ["snowboards", "wax", "gift card"]
-  const samplePrompts = [
-    "Give me product recommendations",
-    "What is your best-selling product?",
-    "I am buying a gift",
-  ]
+  const samplePrompts: { [id: string]: string[] } = {
+    English: [
+      "Give me product recommendations",
+      "What is your best-selling product?",
+      "I am buying a gift",
+    ],
+    "Bahasa Indonesia": [
+      "Berikan rekomendasi produk",
+      "Apa produk yang paling laku?",
+      "Lagi mau beli hadiah",
+    ],
+  }
 
   const getSystemMessage = (context: string) => {
-    //that sells ${categories.join(", ")}
     return [
       {
         role: "user",
@@ -77,40 +86,12 @@ const StoreConversationPage = () => {
     {
       role: "user",
       content:
-        "Remember to always accompany a product name with its product id in the format: <ID>{product_id}</ID>.",
+        `Remember to always accompany a product name with its product id in the format: <ID>{product_id}</ID>. Answer me in ${language}`,
     },
     {
       role: "assistant",
       content:
-        "I will always accompany a product name with its product id in the format: <ID>{product_id}</ID>.",
-    },
-  ]
-
-  const storeInitMessages = [
-    {
-      role: "user",
-      content: `You are a store assistant with the main objective of persuading me to buy products from your store which sells ${categories.join(
-        ", "
-      )}. Don't justify your answers. Jump straight to the answers. Talk to me like a human.
-              
-      When talking about multiple products, always end a product's description with its product id, use the following format:
-
-      1. {product1_name} - {product1_description}
-      
-      <ID>{product1_id}</ID>
-
-      2. {product2_name} - {product2_description}
-      
-      <ID>{product2_id}</ID>
-
-      Note that product_description is optional, however product_name and product_id are COMPULSORY EVERYTIME.
-
-      `,
-    },
-    {
-      role: "assistant",
-      content:
-        "Sure! I will jump straight to the answer. I will always provide the product id in the format <ID>{id}</ID> I will talk like a human.",
+        `I will always accompany a product name with its product id in the format: <ID>{product_id}</ID>. I will answer in ${language}`,
     },
   ]
 
@@ -205,21 +186,6 @@ const StoreConversationPage = () => {
     })
   }
 
-  const getConversationString = () => {
-    let conversation = ""
-    const latestMessages = getLatestMessages(NEED_TO_SUMMARISE)
-
-    const messages =
-      latestMessages.length === 0 ? storeInitMessages : latestMessages
-
-    for (let i = 0; i < messages.length; i++) {
-      const message = messages[i]
-      conversation += message.role + ": " + message.content + ". "
-    }
-
-    return conversation
-  }
-
   const getMentionedProductDescriptionPairs = (paragraph: string) => {
     const productDescriptionPairs = []
     let startIdx = 0
@@ -274,36 +240,6 @@ const StoreConversationPage = () => {
       setSubmittedPrompt(prompt)
       setIsWaitingResponse(true)
       setPrompt("")
-
-      // Contextualise Prompt
-      // let conversation = getConversationString()
-      // conversation += `last_prompt: ${prompt}`
-
-      // const keys = [
-      //   "name_of_product_in_reference_by_last_prompt",
-      //   "last_prompt",
-      // ]
-
-      // const contextualisedPromptResponse = await openai.createChatCompletion({
-      //   model,
-      //   messages: [
-      //     {
-      //       role: "user",
-      //       content: `Conversation: ${conversation}. From the conversation only, pick the appropriate values for only the keys: (${keys}) and nothing more. Base your answer only on the conversation given and nothing more. Format it in JSON.`,
-      //     },
-      //   ],
-      // })
-
-      // let contextualisedPrompt = prompt
-      // try {
-      //   contextualisedPrompt =
-      //     contextualisedPromptResponse.data.choices[0].message!.content
-      //   console.log(contextualisedPrompt)
-      // } catch (error) {
-      //   console.log(
-      //     "Contextualised Prompt Response invalid, continuing without Contextualised Prompt"
-      //   )
-      // }
 
       // Get context for the contextualised prompt
       const embeddingsResponse = await fetch(
@@ -460,10 +396,20 @@ const StoreConversationPage = () => {
               width="100%"
               height="100%"
               display="flex"
+              flexDirection="column"
               justifyContent="center"
               alignItems="center"
               bgcolor="#ffffff"
+              position="relative"
             >
+              <Box position="absolute" left="20px" top="10px" width="500px">
+                <LanguagePicker
+                  value={language}
+                  setValue={setLanguage}
+                  inputValue={inputLanguage}
+                  setInputValue={setInputLanguage}
+                />
+              </Box>
               <Box
                 width="80%"
                 height="60%"
@@ -474,32 +420,34 @@ const StoreConversationPage = () => {
               >
                 <Typography variant="h2">{store!.name}</Typography>
                 <Box display="flex" flexDirection="column" gap="20px">
-                  {samplePrompts.map((prompt: string, idx) => {
-                    return (
-                      <Box
-                        display="flex"
-                        width="230px"
-                        justifyContent="center"
-                        alignItems="center"
-                        textAlign="center"
-                        border="0.5px solid #D3D3D3"
-                        borderRadius="10px"
-                        p="10px"
-                        sx={{
-                          "&:hover": {
-                            cursor: "pointer",
-                            bgcolor: "#D3D3D3",
-                          },
-                        }}
-                        onClick={() => {
-                          setPrompt(prompt)
-                        }}
-                        key={idx}
-                      >
-                        {prompt}
-                      </Box>
-                    )
-                  })}
+                  {samplePrompts[language!].map(
+                    (prompt: string, idx: number) => {
+                      return (
+                        <Box
+                          display="flex"
+                          width="230px"
+                          justifyContent="center"
+                          alignItems="center"
+                          textAlign="center"
+                          border="0.5px solid #D3D3D3"
+                          borderRadius="10px"
+                          p="10px"
+                          sx={{
+                            "&:hover": {
+                              cursor: "pointer",
+                              bgcolor: "#D3D3D3",
+                            },
+                          }}
+                          onClick={() => {
+                            setPrompt(prompt)
+                          }}
+                          key={idx}
+                        >
+                          {prompt}
+                        </Box>
+                      )
+                    }
+                  )}
                 </Box>
               </Box>
             </Box>

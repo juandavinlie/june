@@ -31,19 +31,11 @@ const StoreSummaryTab = () => {
   const store = useContext(StoreContext)
 
   const embeddingsHookObj: EmbeddingsHook = useContext(EmbeddingsContext)
-  const {
-    hasEmbeddings,
-    embeddingsTimestamp,
-    isEmbedding,
-    embedStoreData,
-  } = embeddingsHookObj
+  const { hasEmbeddings, embeddingsTimestamp, isEmbedding, embedStoreData } =
+    embeddingsHookObj
 
   const syncingHookObj: SyncingHook = useContext(SyncingContext)
-  const {
-    isSyncing,
-    syncTimestamp,
-    syncShopifyStoreData,
-  } = syncingHookObj
+  const { isSyncing, syncTimestamp, syncShopifyStoreData } = syncingHookObj
 
   // Currency
   const [isChangingCurrency, setIsChangingCurrency] = useState(false)
